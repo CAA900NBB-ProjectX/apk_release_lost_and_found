@@ -2,7 +2,7 @@ import 'package:flutter/foundation.dart' show kIsWeb;
 
 class ApiConfig {
   static String get baseUrl {
-    return 'https://dce8-142-204-17-60.ngrok-free.app';
+    return 'http://foundit.eastus.cloudapp.azure.com:8085';
   }
   static String get wsUrl {
     if (baseUrl.startsWith('https://')) {
@@ -25,8 +25,9 @@ class ApiConfig {
   static String get resendCodeUrl => '$authBaseUrl/resend';
 
   static String get userBaseUrl => '$baseUrl/user';
-  static String get userMeUrl => '$userBaseUrl/me';
 
+  static String get userMeUrl => '$userBaseUrl/me';
+  static String get userByIdUrl => '$userBaseUrl/getuserbyid';
 
   static String get itemBaseUrl => '$baseUrl/item';
   static String get getAllItemsUrl => '$itemBaseUrl/getallitems';

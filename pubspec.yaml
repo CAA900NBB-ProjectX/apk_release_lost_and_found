@@ -24,6 +24,7 @@ dependencies:
   flutter_launcher_icons: ^0.13.1
   web_socket_channel: ^2.4.0
   stomp_dart_client: ^0.4.4
+  jwt_decoder: ^2.0.1
 
 dev_dependencies:
   flutter_test:
@@ -39,3 +40,5 @@ flutter_launcher_icons:
   android: "launcher_icon"  # Icon name for Android
   ios: true                 # Creates iOS icons
   image_path: "assets/icon/icon.png"  # Path to your icon image
+  adaptive_icon_foreground: null  # Disable adaptive icons
+  adaptive_icon_background: null

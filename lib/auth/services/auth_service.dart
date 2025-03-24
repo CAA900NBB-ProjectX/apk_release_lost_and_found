@@ -5,6 +5,7 @@ import 'package:shared_preferences/shared_preferences.dart';
 import 'package:universal_platform/universal_platform.dart';
 import '../models/user.dart';
 import '../../config/api_config.dart';
+import 'package:jwt_decoder/jwt_decoder.dart';
 
 class AuthService {
   Map<String, String> get _headers => ApiConfig.headers;
@@ -70,10 +71,10 @@ class AuthService {
 
         return {'success': true, 'data': data};
       } else {
-        return {'success': false, 'message': 'Server error'};
+        return {'failure': false, 'message': 'Server error'};
       }
     } catch (e) {
-      return {'success': false, 'message': 'Connection error'};
+      return {'failure': false, 'message': 'Connection error'};
     }
   }
 
@@ -93,10 +94,10 @@ class AuthService {
         final data = json.decode(response.body);
         return {'success': true, 'data': data};
       } else {
-        return {'success': false, 'message': 'Registration failed'};
+        return {'failure': false, 'message': 'Registration failed'};
       }
     } catch (e) {
-      return {'success': false, 'message': 'Connection error'};
+      return {'failure': false, 'message': 'Connection error'};
     }
   }
 
@@ -114,10 +115,10 @@ class AuthService {
       if (response.statusCode >= 200 && response.statusCode < 300) {
         return {'success': true};
       } else {
-        return {'success': false, 'message': 'Verification failed'};
+        return {'failure': false, 'message': 'Verification failed'};
       }
     } catch (e) {
-      return {'success': false, 'message': 'Connection error'};
+      return {'failure': false, 'message': 'Connection error'};
     }
   }
 
@@ -126,8 +127,13 @@ class AuthService {
     if (token == null) return null;
 
     try {
+      Map<String, dynamic> decodedToken = JwtDecoder.decode(token);
+      int userId = decodedToken['user']['id'];
+      print('User ID: $userId');
+      final userUrl = '${ApiConfig.userByIdUrl}/$userId';
+
       final response = await http.get(
-        Uri.parse(ApiConfig.userMeUrl),
+        Uri.parse(userUrl),
         headers: {
           ..._headers,
           'Authorization': 'Bearer $token'

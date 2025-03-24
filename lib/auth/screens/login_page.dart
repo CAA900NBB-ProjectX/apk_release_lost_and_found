@@ -30,8 +30,8 @@ class _LoginPageState extends State<LoginPage> {
         _emailController.text.trim(),
         _passwordController.text,
       );
-    print("Inside _login");
-    print(mounted);
+      print("Inside _login");
+      print(mounted);
       if (mounted) {
         if (result.containsKey('success') && result['success']) {
           Navigator.pushReplacementNamed(context, '/home');
@@ -70,6 +70,7 @@ class _LoginPageState extends State<LoginPage> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
+      backgroundColor: Colors.black,
       body: Container(
         margin: const EdgeInsets.all(24),
         child: Form(
@@ -77,8 +78,8 @@ class _LoginPageState extends State<LoginPage> {
           child: Column(
             mainAxisAlignment: MainAxisAlignment.spaceEvenly,
             children: [
-              _buildHeader(),
-              _buildInputFields(),
+              Flexible(child: _buildHeader()),
+              Expanded(child: _buildInputFields()),
               _buildForgotPassword(),
               _buildSignupPrompt(),
             ],
@@ -92,22 +93,27 @@ class _LoginPageState extends State<LoginPage> {
     return Column(
       mainAxisAlignment: MainAxisAlignment.center,
       children: [
-        // Logo
         Image.asset(
-          'assets/images/logo-foundit.png', // Update with your logo path
-          height: 160, // Adjust size as needed
+          'assets/images/logo-foundit.png',
+          height: 160,
           width: 160,
         ),
-        // const SizedBox(height: 2), // Add some spacing
         const Text(
           "Found It!",
           textAlign: TextAlign.center,
-          style: TextStyle(fontSize: 30, fontWeight: FontWeight.bold),
+          style: TextStyle(
+            fontSize: 30,
+            fontWeight: FontWeight.bold,
+            color: Colors.white,
+          ),
         ),
-        const SizedBox(height: 20), // Add some spacing
+        const SizedBox(height: 20),
         const Text(
           "Enter your credentials to login",
           textAlign: TextAlign.center,
+          style: TextStyle(
+            color: Colors.white70,
+          ),
         ),
       ],
     );
@@ -130,14 +136,16 @@ class _LoginPageState extends State<LoginPage> {
           controller: _emailController,
           decoration: InputDecoration(
             hintText: "Email",
+            hintStyle: TextStyle(color: Colors.grey),
             border: OutlineInputBorder(
               borderRadius: BorderRadius.circular(18),
               borderSide: BorderSide.none,
             ),
-            fillColor: Colors.purple.withOpacity(0.1),
+            fillColor: Colors.white.withOpacity(0.1),
             filled: true,
-            prefixIcon: const Icon(Icons.email),
+            prefixIcon: const Icon(Icons.email, color: Colors.green),
           ),
+          style: TextStyle(color: Colors.white),
           validator: (value) {
             if (value == null || value.isEmpty) {
               return 'Please enter your email';
@@ -153,20 +161,23 @@ class _LoginPageState extends State<LoginPage> {
           controller: _passwordController,
           decoration: InputDecoration(
             hintText: "Password",
+            hintStyle: TextStyle(color: Colors.grey),
             border: OutlineInputBorder(
               borderRadius: BorderRadius.circular(18),
               borderSide: BorderSide.none,
             ),
-            fillColor: Colors.purple.withOpacity(0.1),
+            fillColor: Colors.white.withOpacity(0.1),
             filled: true,
-            prefixIcon: const Icon(Icons.password),
+            prefixIcon: const Icon(Icons.password, color: Colors.green),
             suffixIcon: GestureDetector(
               onTap: _togglePasswordVisibility,
               child: Icon(
                 _isPasswordHidden ? Icons.visibility : Icons.visibility_off,
+                color: Colors.green,
               ),
             ),
           ),
+          style: TextStyle(color: Colors.white),
           obscureText: _isPasswordHidden,
           validator: (value) {
             if (value == null || value.isEmpty) {
@@ -181,7 +192,7 @@ class _LoginPageState extends State<LoginPage> {
           style: ElevatedButton.styleFrom(
             shape: const StadiumBorder(),
             padding: const EdgeInsets.symmetric(vertical: 16),
-            backgroundColor: Colors.purple,
+            backgroundColor: Colors.green,
           ),
           child: _isLoading
               ? const CircularProgressIndicator(color: Colors.white)
@@ -196,12 +207,10 @@ class _LoginPageState extends State<LoginPage> {
 
   Widget _buildForgotPassword() {
     return TextButton(
-      onPressed: () {
-        // TODO: Implement forgot password functionality
-      },
+      onPressed: () {},
       child: const Text(
         "Forgot password?",
-        style: TextStyle(color: Colors.purple),
+        style: TextStyle(color: Colors.green),
       ),
     );
   }
@@ -210,14 +219,17 @@ class _LoginPageState extends State<LoginPage> {
     return Row(
       mainAxisAlignment: MainAxisAlignment.center,
       children: [
-        const Text("Don't have an account? "),
+        const Text(
+          "Don't have an account? ",
+          style: TextStyle(color: Colors.white70),
+        ),
         TextButton(
           onPressed: () {
             Navigator.pushNamed(context, '/signup');
           },
           child: const Text(
             "Sign Up",
-            style: TextStyle(color: Colors.purple),
+            style: TextStyle(color: Colors.green),
           ),
         )
       ],

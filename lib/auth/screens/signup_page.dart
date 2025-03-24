@@ -76,6 +76,7 @@ class _SignupPageState extends State<SignupPage> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
+      backgroundColor: Colors.black, // Set background to black
       body: SingleChildScrollView(
         child: Container(
           padding: const EdgeInsets.symmetric(horizontal: 40),
@@ -100,6 +101,7 @@ class _SignupPageState extends State<SignupPage> {
         style: TextStyle(
           fontSize: 30,
           fontWeight: FontWeight.bold,
+          color: Colors.white, // Changed to white for visibility on black
         ),
         textAlign: TextAlign.center,
       ),
@@ -187,7 +189,7 @@ class _SignupPageState extends State<SignupPage> {
         style: ElevatedButton.styleFrom(
           shape: const StadiumBorder(),
           padding: const EdgeInsets.symmetric(vertical: 16),
-          backgroundColor: Colors.purple,
+          backgroundColor: Colors.green, // Changed to green from purple
         ),
         child: _isLoading
             ? const CircularProgressIndicator(color: Colors.white)
@@ -200,14 +202,17 @@ class _SignupPageState extends State<SignupPage> {
       Row(
         mainAxisAlignment: MainAxisAlignment.center,
         children: [
-          const Text("Already have an account?"),
+          const Text(
+            "Already have an account?",
+            style: TextStyle(color: Colors.white70), // Changed to white70 for visibility
+          ),
           TextButton(
             onPressed: () {
               Navigator.pushReplacementNamed(context, '/login');
             },
             child: const Text(
               "Login",
-              style: TextStyle(color: Colors.purple),
+              style: TextStyle(color: Colors.green), // Changed to green from purple
             ),
           ),
         ],
@@ -227,21 +232,24 @@ class _SignupPageState extends State<SignupPage> {
     return TextFormField(
       controller: controller,
       obscureText: isPassword ? (isPasswordHidden ?? true) : false,
+      style: TextStyle(color: Colors.white), // Added white text color for input
       decoration: InputDecoration(
         hintText: hintText,
+        hintStyle: TextStyle(color: Colors.grey), // Changed hint text color
         border: OutlineInputBorder(
           borderRadius: BorderRadius.circular(18),
           borderSide: BorderSide.none,
         ),
-        fillColor: Colors.purple.withOpacity(0.1),
+        fillColor: Colors.white.withOpacity(0.1), // Changed to white with opacity instead of purple
         filled: true,
-        prefixIcon: Icon(icon),
+        prefixIcon: Icon(icon, color: Colors.green), // Changed icon color to green
         suffixIcon: isPassword
             ? IconButton(
           icon: Icon(
             isPasswordHidden ?? true
                 ? Icons.visibility
                 : Icons.visibility_off,
+            color: Colors.green, // Changed icon color to green
           ),
           onPressed: onTogglePassword,
         )

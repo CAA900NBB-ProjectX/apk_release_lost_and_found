@@ -104,6 +104,7 @@ class _VerificationPageState extends State<VerificationPage> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
+      backgroundColor: Colors.black, // Set background to black
       body: Container(
         margin: const EdgeInsets.all(24),
         child: Form(
@@ -117,13 +118,17 @@ class _VerificationPageState extends State<VerificationPage> {
                 style: TextStyle(
                   fontSize: 30,
                   fontWeight: FontWeight.bold,
+                  color: Colors.white, // White text for better visibility
                 ),
                 textAlign: TextAlign.center,
               ),
               const SizedBox(height: 20),
               Text(
                 "A verification code has been sent to ${widget.email}",
-                style: const TextStyle(fontSize: 16),
+                style: const TextStyle(
+                  fontSize: 16,
+                  color: Colors.white70, // Light white text for better contrast
+                ),
                 textAlign: TextAlign.center,
               ),
               const SizedBox(height: 30),
@@ -140,15 +145,17 @@ class _VerificationPageState extends State<VerificationPage> {
               const SizedBox(height: 20),
               TextFormField(
                 controller: _codeController,
+                style: TextStyle(color: Colors.white), // White text for input
                 decoration: InputDecoration(
                   hintText: "Enter Verification Code",
+                  hintStyle: TextStyle(color: Colors.grey), // Grey hint text
                   border: OutlineInputBorder(
                     borderRadius: BorderRadius.circular(18),
                     borderSide: BorderSide.none,
                   ),
-                  fillColor: Colors.purple.withOpacity(0.1),
+                  fillColor: Colors.white.withOpacity(0.1), // White with opacity
                   filled: true,
-                  prefixIcon: const Icon(Icons.security),
+                  prefixIcon: const Icon(Icons.security, color: Colors.green), // Green icon
                 ),
                 validator: (value) {
                   if (value == null || value.isEmpty) {
@@ -163,7 +170,7 @@ class _VerificationPageState extends State<VerificationPage> {
                 style: ElevatedButton.styleFrom(
                   shape: const StadiumBorder(),
                   padding: const EdgeInsets.symmetric(vertical: 16),
-                  backgroundColor: Colors.purple,
+                  backgroundColor: Colors.green, // Changed to green
                 ),
                 child: _isLoading
                     ? const CircularProgressIndicator(color: Colors.white)
@@ -177,7 +184,7 @@ class _VerificationPageState extends State<VerificationPage> {
                 onPressed: _isLoading ? null : _resendCode,
                 child: const Text(
                   "Resend Code",
-                  style: TextStyle(color: Colors.purple),
+                  style: TextStyle(color: Colors.green), // Changed to green
                 ),
               ),
             ],

@@ -12,7 +12,7 @@ class ItemService {
   final storage = const FlutterSecureStorage();
   Map<String, String> get _headers => ApiConfig.headers;
 
-  // Get token directly from local storage for web
+  // IMPORTANT! This method id DEPRECATED
   String? _getToken() {
     if (kIsWeb) {
       // Use SharedPreferences for web instead of localStorage
@@ -23,6 +23,7 @@ class ItemService {
     }
   }
 
+  //Final Method For Tokens
   Future<String?> getToken() async {
     if (UniversalPlatform.isWeb) {
       final prefs = await SharedPreferences.getInstance();
@@ -63,19 +64,12 @@ class ItemService {
 
   // Get headers with auth token
   Map<String, String> _getHeaders() {
-    final token = _getToken();
+    final token = getToken();
     final headers = {
       'Content-Type': 'application/json',
       'Accept': 'application/json',
+      'Authorization': 'Bearer $token'
     };
-
-    if (token != null && token.isNotEmpty) {
-      headers['Authorization'] = 'Bearer $token';
-      print('Using auth token: ${token.length > 10 ? '${token.substring(0, 10)}...' : token}');
-    } else {
-      print('No auth token available');
-    }
-
     return headers;
   }
 
@@ -114,12 +108,6 @@ class ItemService {
         },
       );
 
-
-      // final response = await http.get(
-      //   Uri.parse(url),
-      //   headers: headers,
-      // );
-
       _logResponse('Get All Items', response);
 
       if (response.statusCode >= 200 && response.statusCode < 300) {
@@ -141,47 +129,119 @@ class ItemService {
   }
 
   // Create a new item with images as base64
+  // Future<Item?> createItem(Item item, {List<Uint8List>? imageBytes, List<String>? imageNames}) async {
+  //   //REMOVE THIS TODO:
+  //   final token = await getToken();
+  //
+  //   if (token == null) return null;
+  //
+  //   try {
+  //     final headers = _getHeaders();
+  //
+  //     // If images were provided separately, convert them to base64 and add to the item
+  //     if (imageBytes != null && imageBytes.isNotEmpty) {
+  //       final List<ItemImage> images = [];
+  //
+  //       for (int i = 0; i < imageBytes.length; i++) {
+  //         final String base64Image = base64Encode(imageBytes[i]);
+  //         final String imageName = i < imageNames!.length ? imageNames[i] : 'image_${i+1}.jpg';
+  //
+  //         images.add(ItemImage(
+  //           description: 'Image of ${item.itemName}',
+  //           image: '$base64Image',
+  //           locationFound: item.locationFound,
+  //           dateTime: DateTime.now().toIso8601String().substring(11, 19), // HH:MM:SS
+  //           status: item.status,
+  //         ));
+  //       }
+  //
+  //       // Create a new item with the images
+  //       final newItem = Item(
+  //         itemId: item.itemId,
+  //         itemName: item.itemName,
+  //         description: item.description,
+  //         categoryId: item.categoryId,
+  //         locationFound: item.locationFound,
+  //         dateTimeFound: item.dateTimeFound,
+  //         reportedBy: item.reportedBy,
+  //         contactInfo: item.contactInfo,
+  //         status: item.status,
+  //         images: images,
+  //       );
+  //
+  //       // Use the new item with images for the request
+  //       item = newItem;
+  //     }
+  //
+  //     final jsonData = item.toJson();
+  //     final jsonBody = jsonEncode(jsonData);
+  //     final url = ApiConfig.insertItemUrl;
+  //
+  //     print("Creating item at URL: $url");
+  //     print("With headers: $headers");
+  //     print("Sending JSON: $jsonBody");
+  //
+  //     // final response = await http.post(
+  //     //   Uri.parse(url),
+  //     //   headers: headers,
+  //     //   body: jsonBody,
+  //     // );
+  //
+  //     final response = await http.post(
+  //       Uri.parse(url),
+  //       headers: {
+  //         ..._headers,
+  //         'Authorization': 'Bearer $token',
+  //       },
+  //       body: jsonBody,
+  //     );
+  //
+  //     _logResponse('Create Item', response);
+  //
+  //     if (response.statusCode >= 200 && response.statusCode < 300) {
+  //       try {
+  //         final responseJson = jsonDecode(response.body);
+  //         return Item.fromJson(responseJson);
+  //       } catch (e) {
+  //         print('Error parsing response: $e');
+  //         return null;
+  //       }
+  //     } else {
+  //       print('Failed to create item: ${response.statusCode}');
+  //       return null;
+  //     }
+  //   } catch (e) {
+  //     print('Error creating item: $e');
+  //     return null;
+  //   }
+  // }
+
   Future<Item?> createItem(Item item, {List<Uint8List>? imageBytes, List<String>? imageNames}) async {
+    final token = await getToken();
+    if (token == null) return null;
+
     try {
       final headers = _getHeaders();
 
-      // If images were provided separately, convert them to base64 and add to the item
+      // If images are provided, map them into the updated ItemImage model
       if (imageBytes != null && imageBytes.isNotEmpty) {
-        final List<ItemImage> images = [];
+        item = item.copyWith(
+          images: List.generate(imageBytes.length, (i) {
+            final base64Image = base64Encode(imageBytes[i]);
+            final imageName = i < (imageNames?.length ?? 0) ? imageNames![i] : 'image_${i + 1}.jpg';
 
-        for (int i = 0; i < imageBytes.length; i++) {
-          final String base64Image = base64Encode(imageBytes[i]);
-          final String imageName = i < imageNames!.length ? imageNames[i] : 'image_${i+1}.jpg';
-
-          images.add(ItemImage(
-            description: 'Image of ${item.itemName}',
-            image: 'data:image/jpeg;base64,$base64Image',
-            locationFound: item.locationFound,
-            dateTime: DateTime.now().toIso8601String().substring(11, 19), // HH:MM:SS
-            status: item.status,
-          ));
-        }
-
-        // Create a new item with the images
-        final newItem = Item(
-          itemId: item.itemId,
-          itemName: item.itemName,
-          description: item.description,
-          categoryId: item.categoryId,
-          locationFound: item.locationFound,
-          dateTimeFound: item.dateTimeFound,
-          reportedBy: item.reportedBy,
-          contactInfo: item.contactInfo,
-          status: item.status,
-          images: images,
+            return ItemImage(
+              description: 'Image of ${item.itemName}',
+              image: base64Image,
+              locationFound: item.locationFound,
+              dateTime: DateTime.now().toIso8601String(),
+              status: item.status,
+            );
+          }),
         );
-
-        // Use the new item with images for the request
-        item = newItem;
       }
 
-      final jsonData = item.toJson();
-      final jsonBody = jsonEncode(jsonData);
+      final jsonBody = jsonEncode(item.toJson());
       final url = ApiConfig.insertItemUrl;
 
       print("Creating item at URL: $url");
@@ -190,7 +250,10 @@ class ItemService {
 
       final response = await http.post(
         Uri.parse(url),
-        headers: headers,
+        headers: {
+          ...headers,
+          'Authorization': 'Bearer $token',
+        },
         body: jsonBody,
       );
 
@@ -213,6 +276,7 @@ class ItemService {
       return null;
     }
   }
+
 
   // Get item by ID
   Future<Item?> getItemById(int itemId) async {

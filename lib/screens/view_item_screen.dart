@@ -25,6 +25,10 @@ class _ViewItemScreenState extends State<ViewItemScreen> {
   String? _errorMessage;
   Item? _item;
   List<Uint8List> _images = [];
+  int _selectedIndex = 0;
+
+  // Define a green color for buttons
+  final Color buttonColor = Colors.green;
 
   @override
   void initState() {
@@ -69,10 +73,33 @@ class _ViewItemScreenState extends State<ViewItemScreen> {
     }
   }
 
+  // void _loadImagesFromBase64(List<ItemImage> images) {
+  //   for (var image in images) {
+  //     try {
+  //       final base64Data = image.image.split(',')[1];
+  //       final imageData = base64Decode(base64Data);
+  //
+  //       if (mounted) {
+  //         setState(() {
+  //           _images.add(Uint8List.fromList(imageData));
+  //         });
+  //       }
+  //     } catch (e) {
+  //       print('Error loading image from base64: $e');
+  //     }
+  //   }
+  // }
+
+
   void _loadImagesFromBase64(List<ItemImage> images) {
     for (var image in images) {
       try {
-        final base64Data = image.image.split(',')[1];
+        // Safely handle base64 data with or without prefix
+        String base64Data = image.image;
+        if (base64Data.contains(',')) {
+          base64Data = base64Data.split(',')[1];
+        }
+
         final imageData = base64Decode(base64Data);
 
         if (mounted) {
@@ -82,10 +109,11 @@ class _ViewItemScreenState extends State<ViewItemScreen> {
         }
       } catch (e) {
         print('Error loading image from base64: $e');
+        // Optionally add a placeholder image when decoding fails
+        // _images.add(Uint8List.fromList([0, 0, 0, 0])); // 1x1 transparent pixel
       }
     }
   }
-
   String _formatDate(String isoDate) {
     try {
       final date = DateTime.parse(isoDate);
@@ -95,16 +123,45 @@ class _ViewItemScreenState extends State<ViewItemScreen> {
     }
   }
 
+  void _onItemTapped(int index) {
+    setState(() {
+      _selectedIndex = index;
+    });
+
+    // Navigate based on the selected tab
+    switch (index) {
+      case 0:
+      // Found Items - You would navigate to this screen
+        ScaffoldMessenger.of(context).showSnackBar(
+            SnackBar(content: Text('Navigate to Found Items'))
+        );
+        break;
+      case 1:
+      // Lost Items - You would navigate to this screen
+        ScaffoldMessenger.of(context).showSnackBar(
+            SnackBar(content: Text('Navigate to Lost Items'))
+        );
+        break;
+      case 2:
+      // Profile - You would navigate to this screen
+        ScaffoldMessenger.of(context).showSnackBar(
+            SnackBar(content: Text('Navigate to Profile'))
+        );
+        break;
+    }
+  }
+
   Future<void> _initiateChat() async {
     showDialog(
       context: context,
       barrierDismissible: false,
-      builder: (context) => const AlertDialog(
+      builder: (context) => AlertDialog(
+        backgroundColor: Colors.black87,
         content: Row(
           children: [
-            CircularProgressIndicator(),
+            CircularProgressIndicator(color: buttonColor),
             SizedBox(width: 16),
-            Text('Connecting to chat...'),
+            Text('Connecting to chat...', style: TextStyle(color: Colors.white)),
           ],
         ),
       ),
@@ -117,7 +174,10 @@ class _ViewItemScreenState extends State<ViewItemScreen> {
       if (token == null) {
         if (context.mounted) Navigator.pop(context);
         ScaffoldMessenger.of(context).showSnackBar(
-            const SnackBar(content: Text('Please log in to chat'))
+            SnackBar(
+              content: Text('Please log in to chat'),
+              backgroundColor: Colors.red,
+            )
         );
         return;
       }
@@ -127,7 +187,10 @@ class _ViewItemScreenState extends State<ViewItemScreen> {
       if (currentUsername == null) {
         if (context.mounted) Navigator.pop(context);
         ScaffoldMessenger.of(context).showSnackBar(
-            const SnackBar(content: Text('Unable to get user information from token'))
+            SnackBar(
+              content: Text('Unable to get user information from token'),
+              backgroundColor: Colors.red,
+            )
         );
         return;
       }
@@ -196,13 +259,19 @@ class _ViewItemScreenState extends State<ViewItemScreen> {
         );
       } else if (context.mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
-            const SnackBar(content: Text('Failed to start chat. Please try again.'))
+            SnackBar(
+              content: Text('Failed to start chat. Please try again.'),
+              backgroundColor: Colors.red,
+            )
         );
       }
     } catch (e) {
       if (context.mounted) Navigator.pop(context);
       ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text('Error: $e'))
+          SnackBar(
+            content: Text('Error: $e'),
+            backgroundColor: Colors.red,
+          )
       );
     }
   }
@@ -233,38 +302,68 @@ class _ViewItemScreenState extends State<ViewItemScreen> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
+      backgroundColor: Colors.black,
       appBar: AppBar(
-        title: Text(_item?.itemName ?? 'Item Details'),
+        backgroundColor: Colors.black,
+        title: Text(
+          _item?.itemName ?? 'Item Details',
+          style: TextStyle(color: Colors.white),
+        ),
+        iconTheme: IconThemeData(color: Colors.white),
       ),
-      body: _isLoading
-          ? const Center(child: CircularProgressIndicator())
-          : _errorMessage != null
-          ? Center(child: Text(_errorMessage!, style: const TextStyle(color: Colors.red)))
-          : _buildItemDetails(),
+      body: SafeArea(
+        child: _isLoading
+            ? Center(child: CircularProgressIndicator(color: buttonColor))
+            : _errorMessage != null
+            ? Center(child: Text(_errorMessage!, style: TextStyle(color: Colors.red)))
+            : _buildItemDetails(),
+      ),
+      bottomNavigationBar: BottomNavigationBar(
+        backgroundColor: Colors.black,
+        selectedItemColor: buttonColor,
+        unselectedItemColor: Colors.grey,
+        currentIndex: _selectedIndex,
+        onTap: _onItemTapped,
+        items: const [
+          BottomNavigationBarItem(
+            icon: Icon(Icons.search),
+            label: 'Found Items',
+          ),
+          BottomNavigationBarItem(
+            icon: Icon(Icons.help_outline),
+            label: 'Lost Items',
+          ),
+          BottomNavigationBarItem(
+            icon: Icon(Icons.person),
+            label: 'Profile',
+          ),
+        ],
+      ),
     );
   }
 
   Widget _buildItemDetails() {
     if (_item == null) {
-      return const Center(child: Text('No item data available'));
+      return Center(child: Text('No item data available', style: TextStyle(color: Colors.white)));
     }
 
     return SingleChildScrollView(
-      padding: const EdgeInsets.all(16.0),
+      padding: const EdgeInsets.symmetric(horizontal: 16.0, vertical: 8.0), // Reduced vertical padding
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-
           if (_images.isNotEmpty)
             SizedBox(
-              height: 250,
+              height: 200, // Reduced from 250
               child: PageView.builder(
                 itemCount: _images.length,
                 itemBuilder: (context, index) {
                   return Card(
+                    color: Colors.grey[900],
                     elevation: 4,
+                    margin: EdgeInsets.symmetric(vertical: 4.0), // Smaller margins
                     child: Padding(
-                      padding: const EdgeInsets.all(8.0),
+                      padding: const EdgeInsets.all(4.0), // Reduced padding
                       child: Image.memory(
                         _images[index],
                         fit: BoxFit.contain,
@@ -276,7 +375,7 @@ class _ViewItemScreenState extends State<ViewItemScreen> {
             )
           else
             Container(
-              height: 200,
+              height: 180, // Reduced from 200
               width: double.infinity,
               decoration: BoxDecoration(
                 color: _getCategoryColor(_item!.categoryId),
@@ -285,25 +384,31 @@ class _ViewItemScreenState extends State<ViewItemScreen> {
               child: Center(
                 child: Icon(
                   _getCategoryIcon(_item!.categoryId),
-                  size: 80,
+                  size: 70, // Reduced from 80
                   color: Colors.white,
                 ),
               ),
             ),
 
-          const SizedBox(height: 20),
+          const SizedBox(height: 12), // Reduced from 20
 
           // Item details
           Card(
+            color: Colors.grey[900],
             elevation: 4,
+            margin: EdgeInsets.symmetric(vertical: 4.0), // Smaller margins
             child: Padding(
-              padding: const EdgeInsets.all(16.0),
+              padding: const EdgeInsets.all(12.0), // Reduced from 16
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
                   Text(
                     _item!.itemName,
-                    style: Theme.of(context).textTheme.headlineSmall,
+                    style: TextStyle(
+                      fontSize: 20, // Reduced from 24
+                      fontWeight: FontWeight.bold,
+                      color: Colors.white,
+                    ),
                   ),
                   Chip(
                     label: Text(
@@ -311,8 +416,9 @@ class _ViewItemScreenState extends State<ViewItemScreen> {
                       style: const TextStyle(color: Colors.white),
                     ),
                     backgroundColor: _item!.status == "FOUND" ? Colors.green : Colors.orange,
+                    padding: EdgeInsets.all(0), // Minimize internal padding
                   ),
-                  const Divider(height: 24),
+                  const Divider(height: 16, color: Colors.grey), // Reduced from 24
 
                   _buildDetailRow(Icons.category, 'Category', _item!.getCategoryName()),
                   _buildDetailRow(Icons.description, 'Description', _item!.description),
@@ -320,31 +426,33 @@ class _ViewItemScreenState extends State<ViewItemScreen> {
                   _buildDetailRow(Icons.calendar_today, 'Date Found', _formatDate(_item!.dateTimeFound)),
                   _buildDetailRow(Icons.person, 'Reported By', _item!.reportedBy),
 
-                  const SizedBox(height: 20),
+                  const SizedBox(height: 12), // Reduced from 20
 
                   // Contact section
-                  const Text(
+                  Text(
                     'Contact Information',
                     style: TextStyle(
-                      fontSize: 18,
+                      fontSize: 16, // Reduced from 18
                       fontWeight: FontWeight.bold,
+                      color: Colors.white,
                     ),
                   ),
-                  const SizedBox(height: 10),
+                  const SizedBox(height: 6), // Reduced from 10
                   Container(
-                    padding: const EdgeInsets.all(12),
+                    padding: const EdgeInsets.all(8), // Reduced from 12
                     decoration: BoxDecoration(
-                      color: Colors.grey[100],
+                      color: Colors.black,
                       borderRadius: BorderRadius.circular(8),
+                      border: Border.all(color: Colors.grey),
                     ),
                     child: Row(
                       children: [
-                        const Icon(Icons.contact_mail),
-                        const SizedBox(width: 12),
+                        Icon(Icons.contact_mail, color: Colors.white, size: 18), // Reduced size
+                        const SizedBox(width: 8), // Reduced from 12
                         Expanded(
                           child: Text(
                             _item!.contactInfo,
-                            style: const TextStyle(fontSize: 16),
+                            style: TextStyle(fontSize: 14, color: Colors.white), // Reduced from 16
                           ),
                         ),
                       ],
@@ -355,39 +463,46 @@ class _ViewItemScreenState extends State<ViewItemScreen> {
             ),
           ),
 
-          const SizedBox(height: 20),
+          const SizedBox(height: 12), // Reduced from 20
 
-
-          Row(
-            mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-            children: [
-              Expanded(
-                child: ElevatedButton.icon(
-                  onPressed: _initiateChat,
-                  icon: const Icon(Icons.email),
-                  label: const Text('Chat'),
-                  style: ElevatedButton.styleFrom(
-                    padding: const EdgeInsets.symmetric(vertical: 12),
+          // Add bottom padding to avoid overflow with bottom navigation bar
+          Padding(
+            padding: EdgeInsets.only(bottom: 8.0),
+            child: Row(
+              mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+              children: [
+                Expanded(
+                  child: ElevatedButton.icon(
+                    onPressed: _initiateChat,
+                    icon: Icon(Icons.email, color: Colors.white, size: 18), // Reduced icon size
+                    label: Text('Chat', style: TextStyle(color: Colors.white)),
+                    style: ElevatedButton.styleFrom(
+                      backgroundColor: buttonColor,
+                      padding: const EdgeInsets.symmetric(vertical: 8), // Reduced from 12
+                    ),
                   ),
                 ),
-              ),
-              const SizedBox(width: 12),
-              Expanded(
-                child: OutlinedButton.icon(
-                  onPressed: () {
-
-                    ScaffoldMessenger.of(context).showSnackBar(
-                      const SnackBar(content: Text('Sharing item details')),
-                    );
-                  },
-                  icon: const Icon(Icons.share),
-                  label: const Text('Share'),
-                  style: OutlinedButton.styleFrom(
-                    padding: const EdgeInsets.symmetric(vertical: 12),
+                const SizedBox(width: 12),
+                Expanded(
+                  child: OutlinedButton.icon(
+                    onPressed: () {
+                      ScaffoldMessenger.of(context).showSnackBar(
+                        SnackBar(
+                          content: Text('Sharing item details'),
+                          backgroundColor: Colors.grey[800],
+                        ),
+                      );
+                    },
+                    icon: Icon(Icons.share, color: buttonColor, size: 18), // Reduced icon size
+                    label: Text('Share', style: TextStyle(color: buttonColor)),
+                    style: OutlinedButton.styleFrom(
+                      side: BorderSide(color: buttonColor),
+                      padding: const EdgeInsets.symmetric(vertical: 8), // Reduced from 12
+                    ),
                   ),
                 ),
-              ),
-            ],
+              ],
+            ),
           ),
         ],
       ),
@@ -396,12 +511,12 @@ class _ViewItemScreenState extends State<ViewItemScreen> {
 
   Widget _buildDetailRow(IconData icon, String label, String value) {
     return Padding(
-      padding: const EdgeInsets.symmetric(vertical: 8.0),
+      padding: const EdgeInsets.symmetric(vertical: 6.0), // Reduced from 8
       child: Row(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          Icon(icon, size: 20, color: Colors.grey[700]),
-          const SizedBox(width: 12),
+          Icon(icon, size: 18, color: Colors.grey[400]), // Reduced from 20
+          const SizedBox(width: 8), // Reduced from 12
           Expanded(
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
@@ -409,14 +524,14 @@ class _ViewItemScreenState extends State<ViewItemScreen> {
                 Text(
                   label,
                   style: TextStyle(
-                    fontSize: 14,
-                    color: Colors.grey[600],
+                    fontSize: 12, // Reduced from 14
+                    color: Colors.grey[400],
                   ),
                 ),
-                const SizedBox(height: 4),
+                const SizedBox(height: 2), // Reduced from 4
                 Text(
                   value,
-                  style: const TextStyle(fontSize: 16),
+                  style: TextStyle(fontSize: 14, color: Colors.white), // Reduced from 16
                 ),
               ],
             ),
