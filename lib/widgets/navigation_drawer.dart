@@ -1,6 +1,8 @@
 import 'package:flutter/material.dart';
+import 'package:found_it_frontend/services/profile_service.dart';
 import '../auth/services/auth_service.dart';
-import '../auth/models/user.dart';
+import '../auth/models/authuser.dart';
+import '../screens/profile_page.dart';
 
 class AppNavigationDrawer extends StatefulWidget {
   final String currentRoute;
@@ -16,7 +18,9 @@ class AppNavigationDrawer extends StatefulWidget {
 
 class _AppNavigationDrawerState extends State<AppNavigationDrawer> {
   final AuthService _authService = AuthService();
-  User? _currentUser;
+  final ProfileService _profileService = ProfileService();
+
+  AuthUser? _currentUser;
   bool _isLoading = true;
 
   @override
@@ -27,10 +31,10 @@ class _AppNavigationDrawerState extends State<AppNavigationDrawer> {
 
   Future<void> _loadUserInfo() async {
     try {
-      final user = await _authService.getCurrentUser();
+      final user = await _profileService.fetchUserProfile();
       if (mounted) {
         setState(() {
-          _currentUser = user;
+          _currentUser = user as AuthUser?;
           _isLoading = false;
         });
       }
@@ -73,7 +77,15 @@ class _AppNavigationDrawerState extends State<AppNavigationDrawer> {
                   icon: Icons.person,
                   route: '/profile',
                   isSelected: widget.currentRoute == '/profile',
-                ),
+                    onTap: () {
+                      Navigator.pop(context);
+                      Navigator.push(
+                        context,
+                        MaterialPageRoute(
+                          builder: (context) => ProfilePage(),
+                        ),
+                      );
+                    }),
                 const Divider(),
                 _buildNavItem(
                   context,

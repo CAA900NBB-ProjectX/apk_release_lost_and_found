@@ -71,18 +71,25 @@ class _LoginPageState extends State<LoginPage> {
   Widget build(BuildContext context) {
     return Scaffold(
       backgroundColor: Colors.black,
-      body: Container(
-        margin: const EdgeInsets.all(24),
-        child: Form(
-          key: _formKey,
-          child: Column(
-            mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-            children: [
-              Flexible(child: _buildHeader()),
-              Expanded(child: _buildInputFields()),
-              _buildForgotPassword(),
-              _buildSignupPrompt(),
-            ],
+      body: Center(
+        child: SingleChildScrollView(
+          physics: const NeverScrollableScrollPhysics(),
+          child: Padding(
+            padding: const EdgeInsets.symmetric(horizontal: 24),
+            child: Form(
+              key: _formKey,
+              child: Column(
+                mainAxisAlignment: MainAxisAlignment.center,
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  _buildHeader(),
+                  const SizedBox(height: 10),
+                  _buildInputFields(),
+                  _buildForgotPassword(),
+                  _buildSignupPrompt(),
+                ],
+              ),
+            ),
           ),
         ),
       ),
@@ -91,27 +98,29 @@ class _LoginPageState extends State<LoginPage> {
 
   Widget _buildHeader() {
     return Column(
+      mainAxisSize: MainAxisSize.min,
       mainAxisAlignment: MainAxisAlignment.center,
       children: [
         Image.asset(
           'assets/images/logo-foundit.png',
-          height: 160,
-          width: 160,
+          height: 80, // Reduced from 100
+          width: 80,  // Reduced from 100
         ),
         const Text(
           "Found It!",
           textAlign: TextAlign.center,
           style: TextStyle(
-            fontSize: 30,
+            fontSize: 22, // Reduced from 26
             fontWeight: FontWeight.bold,
             color: Colors.white,
           ),
         ),
-        const SizedBox(height: 20),
+        const SizedBox(height: 5),
         const Text(
           "Enter your credentials to login",
           textAlign: TextAlign.center,
           style: TextStyle(
+            fontSize: 11, // Reduced from 12
             color: Colors.white70,
           ),
         ),
@@ -121,31 +130,33 @@ class _LoginPageState extends State<LoginPage> {
 
   Widget _buildInputFields() {
     return Column(
+      mainAxisSize: MainAxisSize.min,
       crossAxisAlignment: CrossAxisAlignment.stretch,
       children: [
         if (_errorMessage != null)
           Padding(
-            padding: const EdgeInsets.only(bottom: 16),
+            padding: const EdgeInsets.only(bottom: 8),
             child: Text(
               _errorMessage!,
-              style: const TextStyle(color: Colors.red),
+              style: const TextStyle(color: Colors.red, fontSize: 11),
               textAlign: TextAlign.center,
             ),
           ),
         TextFormField(
           controller: _emailController,
           decoration: InputDecoration(
+            contentPadding: const EdgeInsets.symmetric(vertical: 10), // Reduced padding
             hintText: "Email",
-            hintStyle: TextStyle(color: Colors.grey),
+            hintStyle: const TextStyle(color: Colors.grey, fontSize: 12),
             border: OutlineInputBorder(
               borderRadius: BorderRadius.circular(18),
               borderSide: BorderSide.none,
             ),
             fillColor: Colors.white.withOpacity(0.1),
             filled: true,
-            prefixIcon: const Icon(Icons.email, color: Colors.green),
+            prefixIcon: const Icon(Icons.email, color: Colors.green, size: 18),
           ),
-          style: TextStyle(color: Colors.white),
+          style: const TextStyle(color: Colors.white, fontSize: 12),
           validator: (value) {
             if (value == null || value.isEmpty) {
               return 'Please enter your email';
@@ -156,28 +167,30 @@ class _LoginPageState extends State<LoginPage> {
             return null;
           },
         ),
-        const SizedBox(height: 10),
+        const SizedBox(height: 8),
         TextFormField(
           controller: _passwordController,
           decoration: InputDecoration(
+            contentPadding: const EdgeInsets.symmetric(vertical: 10), // Reduced padding
             hintText: "Password",
-            hintStyle: TextStyle(color: Colors.grey),
+            hintStyle: const TextStyle(color: Colors.grey, fontSize: 12),
             border: OutlineInputBorder(
               borderRadius: BorderRadius.circular(18),
               borderSide: BorderSide.none,
             ),
             fillColor: Colors.white.withOpacity(0.1),
             filled: true,
-            prefixIcon: const Icon(Icons.password, color: Colors.green),
+            prefixIcon: const Icon(Icons.password, color: Colors.green, size: 18),
             suffixIcon: GestureDetector(
               onTap: _togglePasswordVisibility,
               child: Icon(
                 _isPasswordHidden ? Icons.visibility : Icons.visibility_off,
                 color: Colors.green,
+                size: 18,
               ),
             ),
           ),
-          style: TextStyle(color: Colors.white),
+          style: const TextStyle(color: Colors.white, fontSize: 12),
           obscureText: _isPasswordHidden,
           validator: (value) {
             if (value == null || value.isEmpty) {
@@ -186,19 +199,19 @@ class _LoginPageState extends State<LoginPage> {
             return null;
           },
         ),
-        const SizedBox(height: 30),
+        const SizedBox(height: 10),
         ElevatedButton(
           onPressed: _isLoading ? null : _login,
           style: ElevatedButton.styleFrom(
             shape: const StadiumBorder(),
-            padding: const EdgeInsets.symmetric(vertical: 16),
+            padding: const EdgeInsets.symmetric(vertical: 10), // Reduced padding
             backgroundColor: Colors.green,
           ),
           child: _isLoading
-              ? const CircularProgressIndicator(color: Colors.white)
+              ? const CircularProgressIndicator(color: Colors.white, strokeWidth: 2)
               : const Text(
             "Login",
-            style: TextStyle(fontSize: 20, color: Colors.white),
+            style: TextStyle(fontSize: 14, color: Colors.white),
           ),
         )
       ],
@@ -210,7 +223,7 @@ class _LoginPageState extends State<LoginPage> {
       onPressed: () {},
       child: const Text(
         "Forgot password?",
-        style: TextStyle(color: Colors.green),
+        style: TextStyle(color: Colors.green, fontSize: 11),
       ),
     );
   }
@@ -218,10 +231,11 @@ class _LoginPageState extends State<LoginPage> {
   Widget _buildSignupPrompt() {
     return Row(
       mainAxisAlignment: MainAxisAlignment.center,
+      mainAxisSize: MainAxisSize.min,
       children: [
         const Text(
           "Don't have an account? ",
-          style: TextStyle(color: Colors.white70),
+          style: TextStyle(color: Colors.white70, fontSize: 11),
         ),
         TextButton(
           onPressed: () {
@@ -229,7 +243,7 @@ class _LoginPageState extends State<LoginPage> {
           },
           child: const Text(
             "Sign Up",
-            style: TextStyle(color: Colors.green),
+            style: TextStyle(color: Colors.green, fontSize: 11),
           ),
         )
       ],

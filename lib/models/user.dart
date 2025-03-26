@@ -1,4 +1,4 @@
-// File: ../auth/models/user.dart
+// File: ../auth/models/authuser.dart
 
 class User {
   final String id;

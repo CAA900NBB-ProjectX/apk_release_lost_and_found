@@ -6,7 +6,7 @@ import '../auth/services/auth_service.dart';
 import 'dart:convert';
 import 'package:intl/intl.dart';
 import 'dart:typed_data';
-
+import 'profile_page.dart'; // Import ProfilePage
 
 class HomeScreen extends StatefulWidget {
   const HomeScreen({super.key});
@@ -72,9 +72,12 @@ class _HomeScreenState extends State<HomeScreen> {
       return;
     }
 
+    // Directly navigate to ProfilePage
     if (index == 3) {
-      // Profile tab
-      Navigator.pushNamed(context, '/profile');
+      Navigator.push(
+        context,
+        MaterialPageRoute(builder: (context) => ProfilePage()),
+      );
       return;
     }
 
@@ -82,54 +85,6 @@ class _HomeScreenState extends State<HomeScreen> {
       _selectedIndex = index;
     });
   }
-
-  // void _showSearchDialog() {
-  //   showDialog(
-  //     context: context,
-  //     builder: (context) => AlertDialog(
-  //       backgroundColor: Colors.grey[900],
-  //       title: const Text('Search Items', style: TextStyle(color: Colors.white)),
-  //       content: TextField(
-  //         style: const TextStyle(color: Colors.white),
-  //         decoration: InputDecoration(
-  //           hintText: 'Enter item name or description',
-  //           hintStyle: TextStyle(color: Colors.grey[400]),
-  //           filled: true,
-  //           fillColor: Colors.grey[800],
-  //           border: OutlineInputBorder(
-  //             borderRadius: BorderRadius.circular(8),
-  //             borderSide: BorderSide.none,
-  //           ),
-  //           prefixIcon: const Icon(Icons.search, color: Colors.green),
-  //         ),
-  //         onSubmitted: (value) {
-  //           // Implement search functionality
-  //           Navigator.pop(context);
-  //           // For now, just show a message
-  //           ScaffoldMessenger.of(context).showSnackBar(
-  //             SnackBar(
-  //               content: Text('Searching for: $value'),
-  //               backgroundColor: Colors.green,
-  //             ),
-  //           );
-  //         },
-  //       ),
-  //       actions: [
-  //         TextButton(
-  //           child: const Text('Cancel', style: TextStyle(color: Colors.green)),
-  //           onPressed: () => Navigator.pop(context),
-  //         ),
-  //         TextButton(
-  //           child: const Text('Search', style: TextStyle(color: Colors.green)),
-  //           onPressed: () {
-  //             // Get the text from the TextField and perform search
-  //             Navigator.pop(context);
-  //           },
-  //         ),
-  //       ],
-  //     ),
-  //   );
-  // }
 
   void _showSearchDialog() {
     final TextEditingController searchController = TextEditingController();
@@ -191,14 +146,12 @@ class _HomeScreenState extends State<HomeScreen> {
     // Create filtered lists based on the search query
     final List<Item> filteredFoundItems = _allItems
         .where((item) =>
-    item.status == "FOUND" &&
-        (_itemMatchesSearch(item, searchTerm)))
+    item.status == "FOUND" && (_itemMatchesSearch(item, searchTerm)))
         .toList();
 
     final List<Item> filteredLostItems = _allItems
         .where((item) =>
-    item.status == "LOST" &&
-        (_itemMatchesSearch(item, searchTerm)))
+    item.status == "LOST" && (_itemMatchesSearch(item, searchTerm)))
         .toList();
 
     // Show search results
@@ -226,7 +179,8 @@ class _HomeScreenState extends State<HomeScreen> {
 
     ScaffoldMessenger.of(context).showSnackBar(
       SnackBar(
-        content: Text('Found ${filteredFoundItems.length + filteredLostItems.length} matching items'),
+        content:
+        Text('Found ${filteredFoundItems.length + filteredLostItems.length} matching items'),
         backgroundColor: Colors.green,
       ),
     );
@@ -283,7 +237,8 @@ class _HomeScreenState extends State<HomeScreen> {
         backgroundColor: Colors.black,
         selectedItemColor: Colors.green,
         unselectedItemColor: Colors.grey,
-        currentIndex: _selectedIndex > 1 ? _selectedIndex - 2 : _selectedIndex, // Adjust for additional items
+        currentIndex:
+        _selectedIndex > 1 ? _selectedIndex - 2 : _selectedIndex, // Adjust for additional items
         type: BottomNavigationBarType.fixed, // Important for 4+ items
         onTap: _onItemTapped,
         items: const [
@@ -343,94 +298,6 @@ class _HomeScreenState extends State<HomeScreen> {
       },
     );
   }
-
-  // Widget _buildItemTile(Item item) {
-  //   return GestureDetector(
-  //     onTap: () {
-  //       Navigator.pushNamed(
-  //         context,
-  //         '/view_item',
-  //         arguments: item.itemId,
-  //       ).then((_) => _loadItems());
-  //     },
-  //     child: Card(
-  //       elevation: 4,
-  //       color: Colors.grey[900],
-  //       shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
-  //       child: Column(
-  //         crossAxisAlignment: CrossAxisAlignment.start,
-  //         children: [
-  //           // Image or placeholder - Fixed height to prevent overflow
-  //           Container(
-  //             height: 120, // Fixed height for image section
-  //             decoration: BoxDecoration(
-  //               color: _getCategoryColor(item.categoryId),
-  //               borderRadius: const BorderRadius.only(
-  //                 topLeft: Radius.circular(12),
-  //                 topRight: Radius.circular(12),
-  //               ),
-  //             ),
-  //             width: double.infinity,
-  //             child: item.images != null && item.images!.isNotEmpty
-  //                 ? Image.memory(
-  //               base64Decode(item.images![0].image.split(',')[1]),
-  //               fit: BoxFit.cover,
-  //             )
-  //                 : Center(
-  //               child: Icon(
-  //                 _getCategoryIcon(item.categoryId),
-  //                 size: 40,
-  //                 color: Colors.white,
-  //               ),
-  //             ),
-  //           ),
-  //           // Item details - Using Expanded for the remaining space
-  //           Expanded(
-  //             child: Padding(
-  //               padding: const EdgeInsets.all(8.0),
-  //               child: Column(
-  //                 crossAxisAlignment: CrossAxisAlignment.start,
-  //                 mainAxisSize: MainAxisSize.min, // Important for preventing overflow
-  //                 children: [
-  //                   Text(
-  //                     item.itemName,
-  //                     style: const TextStyle(
-  //                       fontWeight: FontWeight.bold,
-  //                       fontSize: 14, // Reduced font size
-  //                       color: Colors.white,
-  //                     ),
-  //                     maxLines: 1,
-  //                     overflow: TextOverflow.ellipsis,
-  //                   ),
-  //                   const SizedBox(height: 2), // Reduced spacing
-  //                   Text(
-  //                     item.getCategoryName(),
-  //                     style: const TextStyle(
-  //                       color: Colors.grey,
-  //                       fontSize: 10, // Reduced font size
-  //                     ),
-  //                   ),
-  //                   const SizedBox(height: 2), // Reduced spacing
-  //                   Text(
-  //                     'Location: ${item.locationFound}',
-  //                     style: const TextStyle(fontSize: 10, color: Colors.white70), // Reduced font size
-  //                     maxLines: 1,
-  //                     overflow: TextOverflow.ellipsis,
-  //                   ),
-  //                   const SizedBox(height: 2), // Reduced spacing
-  //                   Text(
-  //                     'Date: ${_formatDate(item.dateTimeFound)}',
-  //                     style: const TextStyle(fontSize: 10, color: Colors.white70), // Reduced font size
-  //                   ),
-  //                 ],
-  //               ),
-  //             ),
-  //           ),
-  //         ],
-  //       ),
-  //     ),
-  //   );
-  // }
 
   Widget _buildItemTile(Item item) {
     return GestureDetector(
@@ -501,14 +368,14 @@ class _HomeScreenState extends State<HomeScreen> {
                     const SizedBox(height: 2), // Reduced spacing
                     Text(
                       'Location: ${item.locationFound}',
-                      style: const TextStyle(fontSize: 10, color: Colors.white70), // Reduced font size
+                      style: const TextStyle(fontSize: 10, color: Colors.white70),
                       maxLines: 1,
                       overflow: TextOverflow.ellipsis,
                     ),
                     const SizedBox(height: 2), // Reduced spacing
                     Text(
                       'Date: ${_formatDate(item.dateTimeFound)}',
-                      style: const TextStyle(fontSize: 10, color: Colors.white70), // Reduced font size
+                      style: const TextStyle(fontSize: 10, color: Colors.white70),
                     ),
                   ],
                 ),
@@ -520,7 +387,7 @@ class _HomeScreenState extends State<HomeScreen> {
     );
   }
 
-// Helper method to safely decode base64 images
+  // Helper method to safely decode base64 images
   Uint8List _decodeBase64Image(String base64String) {
     // Remove data:image/jpeg;base64, or similar prefixes if present
     String sanitized = base64String;
@@ -539,7 +406,7 @@ class _HomeScreenState extends State<HomeScreen> {
   String _formatDate(String dateString) {
     try {
       final date = DateTime.parse(dateString);
-      return DateFormat('MMM d, yyyy').format(date);
+      return DateFormat('MMM d, hh:mm a').format(date);
     } catch (e) {
       return dateString;
     }
@@ -566,3 +433,4 @@ class _HomeScreenState extends State<HomeScreen> {
     }
   }
 }
+
