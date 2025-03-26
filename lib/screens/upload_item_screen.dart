@@ -4,6 +4,8 @@ import 'package:image_picker/image_picker.dart';
 import 'dart:typed_data';
 import '../models/item.dart';
 import '../services/item_service.dart';
+import '../auth/services/auth_service.dart';
+import '../services/profile_service.dart';
 
 class UploadItemScreen extends StatefulWidget {
   const UploadItemScreen({super.key});
@@ -15,6 +17,7 @@ class UploadItemScreen extends StatefulWidget {
 class _UploadItemScreenState extends State<UploadItemScreen> {
   final _formKey = GlobalKey<FormState>();
   final _itemService = ItemService();
+  final _profileService = ProfileService();
 
   // Form controllers
   final _nameController = TextEditingController();
@@ -29,6 +32,7 @@ class _UploadItemScreenState extends State<UploadItemScreen> {
   bool _isLoading = false;
   String? _errorMessage;
   Item? _createdItem;
+  String? _currentUsername;
 
   // Image picking
   final ImagePicker _picker = ImagePicker();
@@ -45,6 +49,7 @@ class _UploadItemScreenState extends State<UploadItemScreen> {
   @override
   void initState() {
     super.initState();
+    _loadCurrentUsername();
   }
 
   @override
@@ -55,6 +60,21 @@ class _UploadItemScreenState extends State<UploadItemScreen> {
     _reporterController.dispose();
     _contactController.dispose();
     super.dispose();
+  }
+
+  Future<void> _loadCurrentUsername() async {
+    try {
+      final profile = await _profileService.fetchUserProfile();
+      setState(() {
+        _currentUsername = profile.username;
+        _reporterController.text = profile.username ?? '';
+      });
+    } catch (e) {
+      print('Error loading username: $e');
+      setState(() {
+        _errorMessage = 'Could not retrieve username';
+      });
+    }
   }
 
   Future<void> _selectDate(BuildContext context) async {
@@ -116,72 +136,6 @@ class _UploadItemScreenState extends State<UploadItemScreen> {
       }
     }
   }
-
-  // Future<void> _submitItem() async {
-  //   if (!_formKey.currentState!.validate()) return;
-  //
-  //   setState(() {
-  //     _isLoading = true;
-  //     _errorMessage = null;
-  //     _createdItem = null;
-  //   });
-  //
-  //   try {
-  //     // Format date for backend
-  //     final formattedDate = _dateFound.toIso8601String();
-  //
-  //     final newItem = Item(
-  //       itemName: _nameController.text,
-  //       description: _descriptionController.text,
-  //       categoryId: _categoryId,
-  //       locationFound: _locationController.text,
-  //       dateTimeFound: formattedDate,
-  //       reportedBy: _reporterController.text,
-  //       contactInfo: _contactController.text,
-  //       status: _status,
-  //     );
-  //
-  //     // First create the item
-  //     final createdItem = await _itemService.createItem(newItem);
-  //
-  //     if (createdItem != null && _imageBytes.isNotEmpty && createdItem.itemId != null) {
-  //       // Then upload images for this item
-  //       for (int i = 0; i < _imageBytes.length; i++) {
-  //         final success = await _itemService.uploadItemImage(
-  //           createdItem.itemId!,
-  //           _imageBytes[i],
-  //           'image_${i + 1}.jpg',
-  //         );
-  //
-  //         if (!success) {
-  //           setState(() {
-  //             _errorMessage = 'Warning: Some images may not have uploaded correctly';
-  //           });
-  //         }
-  //       }
-  //     }
-  //
-  //     setState(() {
-  //       _isLoading = false;
-  //       if (createdItem != null) {
-  //         _createdItem = createdItem;
-  //         // Clear form fields but don't reset the form since we won't be showing it
-  //         _selectedImages = null;
-  //         _imageBytes.clear();
-  //         _dateFound = DateTime.now();
-  //         _categoryId = 1;
-  //         _status = "FOUND";
-  //       } else {
-  //         _errorMessage = 'Failed to create item. Please try again.';
-  //       }
-  //     });
-  //   } catch (e) {
-  //     setState(() {
-  //       _isLoading = false;
-  //       _errorMessage = 'An error occurred: $e';
-  //     });
-  //   }
-  // }
 
   Future<void> _submitItem() async {
     if (!_formKey.currentState!.validate()) return;
@@ -489,7 +443,7 @@ class _UploadItemScreenState extends State<UploadItemScreen> {
                     'Item Images',
                     style: TextStyle(
                       fontWeight: FontWeight.bold,
-                      fontSize: 16,
+                      fontSize: 12,
                       color: _textColor,
                     ),
                   ),
@@ -606,14 +560,18 @@ class _UploadItemScreenState extends State<UploadItemScreen> {
             ),
           ),
           const SizedBox(height: 16),
-
           TextFormField(
             controller: _reporterController,
-            decoration: _getInputDecoration('Your Name*'),
+            decoration: _getInputDecoration('Your User Name*').copyWith(
+              suffixIcon: _currentUsername != null
+                  ? Icon(Icons.check, color: _buttonColor)
+                  : Icon(Icons.error, color: Colors.red),
+            ),
             style: TextStyle(color: _textColor),
+            readOnly: true, // Make the field read-only
             validator: (value) {
               if (value == null || value.isEmpty) {
-                return 'Please enter your name';
+                return 'Username could not be retrieved';
               }
               return null;
             },

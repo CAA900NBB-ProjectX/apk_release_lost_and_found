@@ -5,9 +5,7 @@ import '../services/chat_service.dart';
 import '../auth/services/auth_service.dart';
 import 'chat_screen.dart';
 
-
 Map<String, dynamic>? globalChatData;
-
 
 class ChatListScreen extends StatefulWidget {
   final int itemId;
@@ -55,7 +53,6 @@ class _ChatListScreenState extends State<ChatListScreen> {
         });
         return;
       }
-
 
       _currentUserId = _getUserIdFromToken(token);
 
@@ -125,16 +122,24 @@ class _ChatListScreenState extends State<ChatListScreen> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
+      backgroundColor: Colors.black,
       appBar: AppBar(
-        title: Text('Chats for ${widget.itemName}'),
-        backgroundColor: Colors.purple,
-        foregroundColor: Colors.white,
+        title: Text(
+          'Chats for ${widget.itemName}',
+          style: const TextStyle(color: Colors.white),
+        ),
+        backgroundColor: Colors.black,
+        iconTheme: const IconThemeData(color: Colors.green),
+        elevation: 0,
       ),
       body: _isLoading
-          ? const Center(child: CircularProgressIndicator())
+          ? const Center(child: CircularProgressIndicator(color: Colors.green))
           : _errorMessage != null
           ? Center(
-          child: Text(_errorMessage!, style: TextStyle(color: Colors.red)))
+          child: Text(
+            _errorMessage!,
+            style: const TextStyle(color: Colors.red),
+          ))
           : _chats.isEmpty
           ? _buildEmptyState()
           : _buildChatList(),
@@ -146,13 +151,15 @@ class _ChatListScreenState extends State<ChatListScreen> {
       child: Column(
         mainAxisSize: MainAxisSize.min,
         children: [
-          Icon(Icons.chat_bubble_outline, size: 64, color: Colors.grey[400]),
+          Icon(Icons.chat_bubble_outline, size: 64, color: Colors.grey[700]),
           const SizedBox(height: 16),
           Text(
             'No chats yet',
-            style: TextStyle(fontSize: 18,
-                fontWeight: FontWeight.bold,
-                color: Colors.grey[600]),
+            style: TextStyle(
+              fontSize: 18,
+              fontWeight: FontWeight.bold,
+              color: Colors.white70,
+            ),
           ),
           const SizedBox(height: 8),
           Text(
@@ -169,10 +176,12 @@ class _ChatListScreenState extends State<ChatListScreen> {
     return ListView.separated(
       padding: const EdgeInsets.all(16),
       itemCount: _chats.length,
-      separatorBuilder: (context, index) => const Divider(height: 1),
+      separatorBuilder: (context, index) => Divider(
+        height: 1,
+        color: Colors.grey[800],
+      ),
       itemBuilder: (context, index) {
         final chat = _chats[index];
-
 
         final isSender = _currentUserId == chat['senderUsername'].toString();
         final otherUserId = isSender
@@ -181,22 +190,32 @@ class _ChatListScreenState extends State<ChatListScreen> {
         final otherUserName = chat['otherUserName'] ?? '$otherUserId';
         print('User  - $chat');
         return ListTile(
+          contentPadding: const EdgeInsets.symmetric(vertical: 8),
           leading: CircleAvatar(
-            backgroundColor: Colors.purple.withOpacity(0.2),
+            backgroundColor: Colors.green.withOpacity(0.2),
             child: Text(
               otherUserName.isNotEmpty ? otherUserName[0].toUpperCase() : '?',
-              style: const TextStyle(color: Colors.purple),
+              style: const TextStyle(color: Colors.green),
             ),
           ),
-          title: Text(otherUserName),
+          title: Text(
+            otherUserName,
+            style: const TextStyle(color: Colors.white),
+          ),
           subtitle: chat['lastMessage'] != null
               ? Text(
             chat['lastMessage'],
             maxLines: 1,
             overflow: TextOverflow.ellipsis,
+            style: TextStyle(color: Colors.grey[400]),
           )
-              : const Text(
-              'No messages yet', style: TextStyle(fontStyle: FontStyle.italic)),
+              : Text(
+            'No messages yet',
+            style: TextStyle(
+              fontStyle: FontStyle.italic,
+              color: Colors.grey[500],
+            ),
+          ),
           trailing: Column(
             mainAxisAlignment: MainAxisAlignment.center,
             crossAxisAlignment: CrossAxisAlignment.end,
@@ -206,19 +225,18 @@ class _ChatListScreenState extends State<ChatListScreen> {
                 style: TextStyle(fontSize: 12, color: Colors.grey[600]),
               ),
               const SizedBox(height: 4),
-              chat['unreadCount'] != null && chat['unreadCount'] > 0
-                  ? Container(
-                padding: const EdgeInsets.all(6),
-                decoration: const BoxDecoration(
-                  color: Colors.purple,
-                  shape: BoxShape.circle,
+              if (chat['unreadCount'] != null && chat['unreadCount'] > 0)
+                Container(
+                  padding: const EdgeInsets.all(6),
+                  decoration: const BoxDecoration(
+                    color: Colors.green,
+                    shape: BoxShape.circle,
+                  ),
+                  child: Text(
+                    chat['unreadCount'].toString(),
+                    style: const TextStyle(color: Colors.white, fontSize: 10),
+                  ),
                 ),
-                child: Text(
-                  chat['unreadCount'].toString(),
-                  style: const TextStyle(color: Colors.white, fontSize: 10),
-                ),
-              )
-                  : const SizedBox(),
             ],
           ),
           onTap: () => _openChat(chat),
@@ -231,7 +249,10 @@ class _ChatListScreenState extends State<ChatListScreen> {
     final token = await _authService.getToken();
     if (token == null || _currentUserId == null) {
       ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text('Please log in again to view the chat')),
+        const SnackBar(
+          content: Text('Please log in again to view the chat'),
+          backgroundColor: Colors.red,
+        ),
       );
       return;
     }
@@ -246,15 +267,14 @@ class _ChatListScreenState extends State<ChatListScreen> {
     Navigator.push(
       context,
       MaterialPageRoute(
-        builder: (context) =>
-            ChatScreen(
-              chatId: chat['id'],
-              currentUsername: _currentUserId!,
-              receiverUsername: otherUserId,
-              itemId: widget.itemId,
-              itemName: widget.itemName,
-              receiver:chat['senderUsername']
-            ),
+        builder: (context) => ChatScreen(
+          chatId: chat['id'],
+          currentUsername: _currentUserId!,
+          receiverUsername: otherUserId,
+          itemId: widget.itemId,
+          itemName: widget.itemName,
+          receiver: chat['senderUsername'],
+        ),
       ),
     ).then((_) => _loadChats());
   }

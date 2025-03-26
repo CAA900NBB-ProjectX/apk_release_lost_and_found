@@ -48,8 +48,7 @@ class ApiConfig {
   static String get sendMessageUrl => '$messageApiUrl/save';
   static String get getChatListUrl => '$chatApiUrl/getchatlist';
 
-
-  static String get wsEndpoint => '$wsUrl/ws';
+  static String get wsEndpoint => '$baseUrl/ws';
 
   static Map<String, String> get headers => {
     'Content-Type': 'application/json',
