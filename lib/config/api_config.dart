@@ -4,14 +4,14 @@ class ApiConfig {
   static String get baseUrl {
     return 'http://foundit.eastus.cloudapp.azure.com:8085';
   }
-  static String get wsUrl {
-    if (baseUrl.startsWith('https://')) {
-      return baseUrl.replaceFirst('https://', 'wss://');
-    } else if (baseUrl.startsWith('http://')) {
-      return baseUrl.replaceFirst('http://', 'ws://');
-    }
-    return baseUrl;
-  }
+  // static String get wsUrl {
+  //   if (baseUrl.startsWith('https://')) {
+  //     return baseUrl.replaceFirst('https://', 'wss://');
+  //   } else if (baseUrl.startsWith('http://')) {
+  //     return baseUrl.replaceFirst('http://', 'ws://');
+  //   }
+  //   return baseUrl;
+  // }
 
 
   static bool get isDevelopment {

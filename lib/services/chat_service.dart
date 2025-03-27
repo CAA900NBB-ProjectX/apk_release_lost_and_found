@@ -265,7 +265,7 @@ class ChatService {
 
       _stompClient = StompClient(
         config: StompConfig.SockJS(
-          url: 'http://localhost:8085/ws',
+          url: '${ApiConfig.wsEndpoint}',
           onConnect: (frame) {
             print('Connected to WebSocket');
 
