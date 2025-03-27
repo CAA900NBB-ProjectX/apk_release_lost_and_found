@@ -27,7 +27,7 @@ class _ChatListScreenState extends State<ChatListScreen> {
   final ChatService _chatService = ChatService();
   final AuthService _authService = AuthService();
   List<Map<String, dynamic>> _chats = [];
-  bool _isLoading = true;
+  bool _isLoading = false;
   String? _errorMessage;
   String? _currentUserId;
 
@@ -131,18 +131,29 @@ class _ChatListScreenState extends State<ChatListScreen> {
         backgroundColor: Colors.black,
         iconTheme: const IconThemeData(color: Colors.green),
         elevation: 0,
+        actions: [
+          // Refresh button added to AppBar
+          IconButton(
+            icon: const Icon(Icons.refresh, color: Colors.green),
+            onPressed: _isLoading ? null : _loadChats,
+          ),
+        ],
       ),
-      body: _isLoading
-          ? const Center(child: CircularProgressIndicator(color: Colors.green))
-          : _errorMessage != null
-          ? Center(
-          child: Text(
-            _errorMessage!,
-            style: const TextStyle(color: Colors.red),
-          ))
-          : _chats.isEmpty
-          ? _buildEmptyState()
-          : _buildChatList(),
+      body: RefreshIndicator(
+        color: Colors.green,
+        onRefresh: _loadChats,
+        child: _isLoading
+            ? const Center(child: CircularProgressIndicator(color: Colors.green))
+            : _errorMessage != null
+            ? Center(
+            child: Text(
+              _errorMessage!,
+              style: const TextStyle(color: Colors.red),
+            ))
+            : _chats.isEmpty
+            ? _buildEmptyState()
+            : _buildChatList(),
+      ),
     );
   }
 
