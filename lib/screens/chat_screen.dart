@@ -9,7 +9,7 @@ class ChatScreen extends StatefulWidget {
   final String receiverUsername;
   final int itemId;
   final String itemName;
-  final String receiver;//
+  final String receiver;
 
   const ChatScreen({
     Key? key,
@@ -18,7 +18,7 @@ class ChatScreen extends StatefulWidget {
     required this.receiverUsername,
     required this.itemId,
     required this.itemName,
-    required this.receiver, //
+    required this.receiver,
   }) : super(key: key);
 
   @override
@@ -46,12 +46,10 @@ class _ChatScreenState extends State<ChatScreen> {
     });
 
     try {
-
       final token = await _authService.getToken();
       if (token == null) {
         throw Exception('Authentication token not found');
       }
-
 
       print('Loading messages for chat: ${widget.chatId}');
       final messages = await _chatService.getChatMessages(widget.chatId, token);
@@ -62,7 +60,6 @@ class _ChatScreenState extends State<ChatScreen> {
           _isLoading = false;
         });
 
-
         print('Loaded ${_messages.length} messages');
         if (_messages.isNotEmpty) {
           print('First message: ${_messages.first.content}');
@@ -70,12 +67,9 @@ class _ChatScreenState extends State<ChatScreen> {
         }
       }
 
-
-      _chatService.connectWebSocket(widget.chatId, widget.currentUsername,);
-
+      _chatService.connectWebSocket(widget.chatId, widget.currentUsername);
 
       _chatService.messages.addListener(_onMessagesUpdated);
-
 
       WidgetsBinding.instance.addPostFrameCallback((_) {
         if (_scrollController.hasClients) {
@@ -105,7 +99,6 @@ class _ChatScreenState extends State<ChatScreen> {
       setState(() {
         _messages = _chatService.messages.value;
       });
-
 
       WidgetsBinding.instance.addPostFrameCallback((_) {
         if (_scrollController.hasClients) {
@@ -147,14 +140,13 @@ class _ChatScreenState extends State<ChatScreen> {
         type: MessageType.TEXT,
         state: MessageState.SENT,
         senderId: widget.currentUsername,
-        receiverId: widget.receiver,//
+        receiverId: widget.receiver,
         createdAt: DateTime.now(),
       );
 
       setState(() {
         _messages = [..._messages, newMessage];
       });
-
 
       WidgetsBinding.instance.addPostFrameCallback((_) {
         if (_scrollController.hasClients) {
@@ -165,7 +157,6 @@ class _ChatScreenState extends State<ChatScreen> {
           );
         }
       });
-
 
       final success = await _chatService.sendMessage(
         content: messageText,
@@ -216,16 +207,17 @@ class _ChatScreenState extends State<ChatScreen> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
+      backgroundColor: Colors.black,
       appBar: AppBar(
         title: Text(widget.itemName),
-        backgroundColor: Colors.purple,
-        foregroundColor: Colors.white,
+        backgroundColor: Colors.black,
+        foregroundColor: Colors.green,
+        elevation: 0,
       ),
       body: _isLoading
-          ? const Center(child: CircularProgressIndicator())
+          ? const Center(child: CircularProgressIndicator(color: Colors.green))
           : Column(
         children: [
-          // Messages list
           Expanded(
             child: _messages.isEmpty
                 ? Center(
@@ -234,14 +226,14 @@ class _ChatScreenState extends State<ChatScreen> {
                 children: [
                   Icon(Icons.chat_bubble_outline,
                     size: 64,
-                    color: Colors.grey[400],
+                    color: Colors.green[800],
                   ),
                   const SizedBox(height: 16),
                   Text(
                     'No messages yet',
                     style: TextStyle(
                       fontSize: 16,
-                      color: Colors.grey[600],
+                      color: Colors.green[600],
                     ),
                   ),
                   const SizedBox(height: 8),
@@ -249,7 +241,7 @@ class _ChatScreenState extends State<ChatScreen> {
                     'Start the conversation!',
                     style: TextStyle(
                       fontSize: 14,
-                      color: Colors.grey[500],
+                      color: Colors.green[500],
                     ),
                   ),
                 ],
@@ -257,8 +249,6 @@ class _ChatScreenState extends State<ChatScreen> {
             )
                 : _buildMessagesList(),
           ),
-
-          // Message input
           _buildMessageInput(),
         ],
       ),
@@ -266,7 +256,6 @@ class _ChatScreenState extends State<ChatScreen> {
   }
 
   Widget _buildMessagesList() {
-
     final Map<String, List<ChatMessage>> messagesByDate = {};
 
     for (var message in _messages) {
@@ -290,11 +279,9 @@ class _ChatScreenState extends State<ChatScreen> {
       itemBuilder: (context, index) {
         final item = flattenedList[index];
 
-
         if (item is String) {
           return _buildDateHeader(item);
         }
-
 
         final message = item as ChatMessage;
         return _buildMessageBubble(message);
@@ -309,14 +296,14 @@ class _ChatScreenState extends State<ChatScreen> {
         child: Container(
           padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 6),
           decoration: BoxDecoration(
-            color: Colors.grey[200],
+            color: Colors.green[900]?.withOpacity(0.5),
             borderRadius: BorderRadius.circular(16),
           ),
           child: Text(
             date,
             style: TextStyle(
               fontSize: 12,
-              color: Colors.grey[800],
+              color: Colors.green[100],
               fontWeight: FontWeight.w500,
             ),
           ),
@@ -340,7 +327,7 @@ class _ChatScreenState extends State<ChatScreen> {
             ),
             padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 10),
             decoration: BoxDecoration(
-              color: isMe ? Colors.purple : Colors.grey[200],
+              color: isMe ? Colors.green[800] : Colors.green[900]?.withOpacity(0.5),
               borderRadius: BorderRadius.circular(18),
             ),
             child: Column(
@@ -349,7 +336,7 @@ class _ChatScreenState extends State<ChatScreen> {
                 Text(
                   message.content,
                   style: TextStyle(
-                    color: isMe ? Colors.white : Colors.black,
+                    color: isMe ? Colors.white : Colors.green[100],
                     fontSize: 15,
                   ),
                 ),
@@ -362,7 +349,7 @@ class _ChatScreenState extends State<ChatScreen> {
               _formatTime(message.createdAt),
               style: TextStyle(
                 fontSize: 11,
-                color: Colors.grey[600],
+                color: Colors.green[600],
               ),
             ),
           ),
@@ -375,31 +362,31 @@ class _ChatScreenState extends State<ChatScreen> {
     return Container(
       padding: const EdgeInsets.all(12),
       decoration: BoxDecoration(
-        color: Colors.white,
+        color: Colors.black,
         boxShadow: [
           BoxShadow(
             offset: const Offset(0, -2),
             blurRadius: 4,
-            color: Colors.black.withOpacity(0.1),
+            color: Colors.green.withOpacity(0.3),
           ),
         ],
       ),
       child: SafeArea(
         child: Row(
           children: [
-            // Message input field
             Expanded(
               child: Container(
                 decoration: BoxDecoration(
-                  color: Colors.grey[100],
+                  color: Colors.green[900]?.withOpacity(0.2),
                   borderRadius: BorderRadius.circular(24),
-                  border: Border.all(color: Colors.grey[300]!),
+                  border: Border.all(color: Colors.green[800]!),
                 ),
                 child: TextField(
                   controller: _messageController,
+                  style: TextStyle(color: Colors.green[100]),
                   decoration: InputDecoration(
                     hintText: 'Type a message...',
-                    hintStyle: TextStyle(color: Colors.grey[500]),
+                    hintStyle: TextStyle(color: Colors.green[600]),
                     border: InputBorder.none,
                     contentPadding: const EdgeInsets.symmetric(
                       horizontal: 16,
@@ -414,11 +401,10 @@ class _ChatScreenState extends State<ChatScreen> {
               ),
             ),
 
-            // Send button
             const SizedBox(width: 8),
             CircleAvatar(
               radius: 22,
-              backgroundColor: Colors.purple,
+              backgroundColor: Colors.green[800],
               child: IconButton(
                 icon: _sendingMessage
                     ? const SizedBox(
@@ -448,4 +434,3 @@ class _ChatScreenState extends State<ChatScreen> {
     super.dispose();
   }
 }
-

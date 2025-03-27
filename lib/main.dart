@@ -4,9 +4,10 @@ import 'auth/screens/signup_page.dart';
 import 'auth/services/auth_service.dart';
 import 'auth/screens/verification_page.dart';
 import 'screens/home_screen.dart';
-import 'screens/profile_screen.dart';
+import 'screens/profile_screen.dart'; // Import the profile screen
 import 'screens/upload_item_screen.dart';
 import 'screens/view_item_screen.dart';
+import 'screens/profile_page.dart'; // Import the new profile page
 
 void main() {
   runApp(const MyApp());
@@ -33,7 +34,8 @@ class MyApp extends StatelessWidget {
             email: ModalRoute.of(context)!.settings.arguments as String
         ),
         '/home': (context) => const HomeScreen(),
-        '/profile': (context) => const ProfileScreen(),
+        '/profile': (context) => const ProfileScreen(), // Register the profile screen route.  You can remove this if you are not using it.
+        '/profile_page': (context) => const ProfilePage(), // Register the new profile page route
         '/upload_item': (context) => const UploadItemScreen(),
         '/view_item': (context) => ViewItemScreen(
             itemId: ModalRoute.of(context)!.settings.arguments as int
@@ -83,3 +85,4 @@ class _AuthenticationWrapperState extends State<AuthenticationWrapper> {
     return _isAuthenticated ? const HomeScreen() : const LoginPage();
   }
 }
+

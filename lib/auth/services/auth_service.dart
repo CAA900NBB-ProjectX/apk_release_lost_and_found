@@ -3,9 +3,11 @@ import 'package:http/http.dart' as http;
 import 'package:flutter_secure_storage/flutter_secure_storage.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:universal_platform/universal_platform.dart';
-import '../models/user.dart';
+import 'package:found_it_frontend/auth/models/authuser.dart';
 import '../../config/api_config.dart';
 import 'package:jwt_decoder/jwt_decoder.dart';
+
+import '../../models/profile.dart';
 
 class AuthService {
   Map<String, String> get _headers => ApiConfig.headers;
@@ -122,7 +124,7 @@ class AuthService {
     }
   }
 
-  Future<User?> getCurrentUser() async {
+  Future<AuthUser?> getCurrentUser() async {
     final token = await getToken();
     if (token == null) return null;
 
@@ -130,7 +132,7 @@ class AuthService {
       Map<String, dynamic> decodedToken = JwtDecoder.decode(token);
       int userId = decodedToken['user']['id'];
       print('User ID: $userId');
-      final userUrl = '${ApiConfig.userByIdUrl}/$userId';
+      final userUrl = '${ApiConfig.userByIdUrl}?userId=$userId';
 
       final response = await http.get(
         Uri.parse(userUrl),
@@ -141,7 +143,7 @@ class AuthService {
       );
 
       if (response.statusCode >= 200 && response.statusCode < 300) {
-        return User.fromJson(json.decode(response.body));
+        return AuthUser.fromJson(json.decode(response.body));
       }
       return null;
     } catch (e) {

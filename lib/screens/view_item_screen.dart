@@ -1,6 +1,11 @@
+import 'dart:io';
+
 import 'package:flutter/material.dart';
+import 'package:image_picker/image_picker.dart';
 import 'dart:typed_data';
 import 'package:intl/intl.dart';
+import 'package:path_provider/path_provider.dart';
+import 'package:share_plus/share_plus.dart';
 import '../models/item.dart';
 import '../services/item_service.dart';
 import 'dart:convert';
@@ -8,6 +13,7 @@ import '../auth/services/auth_service.dart';
 import '../services/chat_service.dart';
 import 'chat_screen.dart';
 import 'chat_list_screen.dart';
+
 
 class ViewItemScreen extends StatefulWidget {
   final int itemId;
@@ -485,22 +491,22 @@ class _ViewItemScreenState extends State<ViewItemScreen> {
                 const SizedBox(width: 12),
                 Expanded(
                   child: OutlinedButton.icon(
-                    onPressed: () {
-                      ScaffoldMessenger.of(context).showSnackBar(
-                        SnackBar(
-                          content: Text('Sharing item details'),
-                          backgroundColor: Colors.grey[800],
-                        ),
-                      );
-                    },
-                    icon: Icon(Icons.share, color: buttonColor, size: 18), // Reduced icon size
-                    label: Text('Share', style: TextStyle(color: buttonColor)),
-                    style: OutlinedButton.styleFrom(
-                      side: BorderSide(color: buttonColor),
-                      padding: const EdgeInsets.symmetric(vertical: 8), // Reduced from 12
-                    ),
+                    onPressed: _shareItemDetails,
+    icon: Icon(Icons.share, color: buttonColor, size: 18),
+    label: Text('Share', style: TextStyle(color: buttonColor)),
+    style: OutlinedButton.styleFrom(
+    side: BorderSide(color: buttonColor),
+    padding: const EdgeInsets.symmetric(vertical: 8),
+    ),
+    ),
+                    // icon: Icon(Icons.share, color: buttonColor, size: 18), // Reduced icon size
+                    // label: Text('Share', style: TextStyle(color: buttonColor)),
+                    // style: OutlinedButton.styleFrom(
+                    //   side: BorderSide(color: buttonColor),
+                    //   padding: const EdgeInsets.symmetric(vertical: 8), // Reduced from 12
+                    // ),
                   ),
-                ),
+                // ),
               ],
             ),
           ),
@@ -540,6 +546,62 @@ class _ViewItemScreenState extends State<ViewItemScreen> {
       ),
     );
   }
+
+  Future<void> _shareItemDetails() async {
+    if (_item == null) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Text('No item details available to share'),
+          backgroundColor: Colors.red,
+        ),
+      );
+      return;
+    }
+
+    // Construct a readable share text
+    final shareText = '''
+Found Item Details:
+Name: ${_item!.itemName}
+Category: ${_item!.getCategoryName()}
+Location: ${_item!.locationFound}
+Date Found: ${_formatDate(_item!.dateTimeFound)}
+Description: ${_item!.description}
+
+Contact: ${_item!.contactInfo}
+Status: ${_item!.status}
+''';
+
+    // Prepare image to share (optional)
+    XFile? imageToShare;
+    if (_images.isNotEmpty) {
+      try {
+        // Save the first image to a temporary file
+        final tempDir = await getTemporaryDirectory();
+        final tempFile = await File('${tempDir.path}/item_image.png').create();
+        await tempFile.writeAsBytes(_images.first);
+        imageToShare = XFile(tempFile.path);
+      } catch (e) {
+        print('Error preparing image for sharing: $e');
+      }
+    }
+
+    try {
+      // Share with optional image
+      await Share.shareXFiles(
+        imageToShare != null ? [imageToShare] : [],
+        text: shareText,
+        subject: 'Found Item: ${_item!.itemName}',
+      );
+    } catch (e) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Text('Failed to share item: $e'),
+          backgroundColor: Colors.red,
+        ),
+      );
+    }
+  }
+
 
   IconData _getCategoryIcon(int categoryId) {
     switch (categoryId) {
