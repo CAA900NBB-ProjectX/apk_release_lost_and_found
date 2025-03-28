@@ -86,6 +86,50 @@ class _HomeScreenState extends State<HomeScreen> {
     });
   }
 
+  // void _showSearchDialog() {
+  //   final TextEditingController searchController = TextEditingController();
+  //
+  //   showDialog(
+  //     context: context,
+  //     builder: (context) => AlertDialog(
+  //       backgroundColor: Colors.grey[900],
+  //       title: const Text('Search Items', style: TextStyle(color: Colors.white)),
+  //       content: TextField(
+  //         controller: searchController,
+  //         style: const TextStyle(color: Colors.white),
+  //         decoration: InputDecoration(
+  //           hintText: 'Enter item name or description',
+  //           hintStyle: TextStyle(color: Colors.grey[400]),
+  //           filled: true,
+  //           fillColor: Colors.grey[800],
+  //           border: OutlineInputBorder(
+  //             borderRadius: BorderRadius.circular(8),
+  //             borderSide: BorderSide.none,
+  //           ),
+  //           prefixIcon: const Icon(Icons.search, color: Colors.green),
+  //         ),
+  //         onSubmitted: (value) {
+  //           _performSearch(value);
+  //           Navigator.pop(context);
+  //         },
+  //       ),
+  //       actions: [
+  //         TextButton(
+  //           child: const Text('Cancel', style: TextStyle(color: Colors.green)),
+  //           onPressed: () => Navigator.pop(context),
+  //         ),
+  //         TextButton(
+  //           child: const Text('Search', style: TextStyle(color: Colors.green)),
+  //           onPressed: () {
+  //             _performSearch(searchController.text);
+  //             Navigator.pop(context);
+  //           },
+  //         ),
+  //       ],
+  //     ),
+  //   );
+  // }
+
   void _showSearchDialog() {
     final TextEditingController searchController = TextEditingController();
 
@@ -109,8 +153,8 @@ class _HomeScreenState extends State<HomeScreen> {
             prefixIcon: const Icon(Icons.search, color: Colors.green),
           ),
           onSubmitted: (value) {
-            _performSearch(value);
-            Navigator.pop(context);
+            Navigator.pop(context); // Close the dialog first
+            _performSearch(value); // Then perform the search
           },
         ),
         actions: [
@@ -121,14 +165,69 @@ class _HomeScreenState extends State<HomeScreen> {
           TextButton(
             child: const Text('Search', style: TextStyle(color: Colors.green)),
             onPressed: () {
-              _performSearch(searchController.text);
-              Navigator.pop(context);
+              Navigator.pop(context); // Close the dialog first
+              _performSearch(searchController.text); // Then perform the search
             },
           ),
         ],
       ),
     );
   }
+  // void _performSearch(String query) {
+  //   if (query.isEmpty) {
+  //     ScaffoldMessenger.of(context).showSnackBar(
+  //       const SnackBar(
+  //         content: Text('Please enter a search term'),
+  //         backgroundColor: Colors.amber,
+  //       ),
+  //     );
+  //     return;
+  //   }
+  //
+  //   final String searchTerm = query.toLowerCase();
+  //
+  //   // Create filtered lists based on the search query
+  //   final List<Item> filteredFoundItems = _allItems
+  //       .where((item) =>
+  //   item.status == "FOUND" && (_itemMatchesSearch(item, searchTerm)))
+  //       .toList();
+  //
+  //   final List<Item> filteredLostItems = _allItems
+  //       .where((item) =>
+  //   item.status == "LOST" && (_itemMatchesSearch(item, searchTerm)))
+  //       .toList();
+  //
+  //   // Show search results
+  //   if (filteredFoundItems.isEmpty && filteredLostItems.isEmpty) {
+  //     ScaffoldMessenger.of(context).showSnackBar(
+  //       SnackBar(
+  //         content: Text('No items match "$query"'),
+  //         backgroundColor: Colors.red,
+  //       ),
+  //     );
+  //     return;
+  //   }
+  //
+  //   // Navigate to search results screen
+  //   Navigator.push(
+  //     context,
+  //     MaterialPageRoute(
+  //       builder: (context) => SearchResultsScreen(
+  //         query: query,
+  //         foundItems: filteredFoundItems,
+  //         lostItems: filteredLostItems,
+  //       ),
+  //     ),
+  //   ).then((_) => _loadItems()); // Refresh items when returning
+  //
+  //   ScaffoldMessenger.of(context).showSnackBar(
+  //     SnackBar(
+  //       content:
+  //       Text('Found ${filteredFoundItems.length + filteredLostItems.length} matching items'),
+  //       backgroundColor: Colors.green,
+  //     ),
+  //   );
+  // }
 
   void _performSearch(String query) {
     if (query.isEmpty) {
@@ -154,7 +253,7 @@ class _HomeScreenState extends State<HomeScreen> {
     item.status == "LOST" && (_itemMatchesSearch(item, searchTerm)))
         .toList();
 
-    // Show search results
+    // Check if any items match the search
     if (filteredFoundItems.isEmpty && filteredLostItems.isEmpty) {
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(
@@ -177,10 +276,12 @@ class _HomeScreenState extends State<HomeScreen> {
       ),
     ).then((_) => _loadItems()); // Refresh items when returning
 
+    // Show a snackbar with the number of matching items
     ScaffoldMessenger.of(context).showSnackBar(
       SnackBar(
-        content:
-        Text('Found ${filteredFoundItems.length + filteredLostItems.length} matching items'),
+        content: Text(
+          'Found ${filteredFoundItems.length + filteredLostItems.length} matching items',
+        ),
         backgroundColor: Colors.green,
       ),
     );

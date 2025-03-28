@@ -40,7 +40,7 @@ class _ProfilePageState extends State<ProfilePage> {
           const Divider(color: Colors.grey, height: 20),
           _buildProfileInfoRow('Email', profile.email),
           const Divider(color: Colors.grey, height: 20),
-          _buildProfileInfoRow('Account Status', profile.enabled ? 'Active' : 'Inactive'),
+          _buildProfileInfoRow('Account Status', profile.enabled ? 'Inactive' : 'Active'),
           const Divider(color: Colors.grey, height: 20),
           _buildProfileInfoRow('Address', profile.address1 ?? 'N/A'),
           const Divider(color: Colors.grey, height: 20),
