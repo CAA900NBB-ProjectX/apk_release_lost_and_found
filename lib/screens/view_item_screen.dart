@@ -1,6 +1,8 @@
 import 'dart:io';
 
 import 'package:flutter/material.dart';
+import 'package:found_it_frontend/screens/home_screen.dart';
+import 'package:found_it_frontend/screens/profile_page.dart';
 import 'package:image_picker/image_picker.dart';
 import 'dart:typed_data';
 import 'package:intl/intl.dart';
@@ -138,21 +140,35 @@ class _ViewItemScreenState extends State<ViewItemScreen> {
     switch (index) {
       case 0:
       // Found Items - You would navigate to this screen
-        ScaffoldMessenger.of(context).showSnackBar(
-            SnackBar(content: Text('Navigate to Found Items'))
-        );
+      //   ScaffoldMessenger.of(context).showSnackBar(
+      //       SnackBar(content: Text('Navigate to Found Items'))
+      //   );
+        Navigator.push(
+            context,
+            MaterialPageRoute(builder: (context) => HomeScreen())
+            );
         break;
       case 1:
       // Lost Items - You would navigate to this screen
-        ScaffoldMessenger.of(context).showSnackBar(
-            SnackBar(content: Text('Navigate to Lost Items'))
+      //   ScaffoldMessenger.of(context).showSnackBar(
+      //       SnackBar(content: Text('Navigate to Lost Items'))
+      //   );
+      //
+      //
+        Navigator.push(
+        context,
+        MaterialPageRoute(builder: (context) => HomeScreen())
         );
         break;
       case 2:
       // Profile - You would navigate to this screen
-        ScaffoldMessenger.of(context).showSnackBar(
-            SnackBar(content: Text('Navigate to Profile'))
+        Navigator.push(
+          context,
+          MaterialPageRoute(builder: (context) => ProfilePage()),
         );
+        // ScaffoldMessenger.of(context).showSnackBar(
+        //     SnackBar(content: Text('Navigate to Profile'))
+        // );
         break;
     }
   }
