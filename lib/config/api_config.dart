@@ -2,7 +2,7 @@ import 'package:flutter/foundation.dart' show kIsWeb;
 
 class ApiConfig {
   static String get baseUrl {
-    return 'http://foundit.eastus.cloudapp.azure.com:8085';
+    return 'http://founditbackend.eastus.cloudapp.azure.com:8085';
   }
   // static String get wsUrl {
   //   if (baseUrl.startsWith('https://')) {

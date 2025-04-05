@@ -348,7 +348,7 @@ class _ViewItemScreenState extends State<ViewItemScreen> {
         onTap: _onItemTapped,
         items: const [
           BottomNavigationBarItem(
-            icon: Icon(Icons.search),
+            icon: Icon(Icons.assignment_late),
             label: 'Found Items',
           ),
           BottomNavigationBarItem(
@@ -383,7 +383,7 @@ class _ViewItemScreenState extends State<ViewItemScreen> {
                   return Card(
                     color: Colors.grey[900],
                     elevation: 4,
-                    margin: EdgeInsets.symmetric(vertical: 4.0), // Smaller margins
+                    margin: EdgeInsets.symmetric(vertical: 2.0), // Smaller margins
                     child: Padding(
                       padding: const EdgeInsets.all(4.0), // Reduced padding
                       child: Image.memory(

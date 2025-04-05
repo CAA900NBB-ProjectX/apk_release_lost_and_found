@@ -113,6 +113,11 @@ class _UploadItemScreenState extends State<UploadItemScreen> {
           _selectedImages = images;
           _loadImageBytes();
         });
+      } else {
+        setState(() {
+          _selectedImages = [XFile('assets/images/no_image_found.png')]; // Replace with your default image path
+          _loadImageBytes();
+        });
       }
     } catch (e) {
       setState(() {
@@ -122,8 +127,12 @@ class _UploadItemScreenState extends State<UploadItemScreen> {
   }
 
   Future<void> _loadImageBytes() async {
-    if (_selectedImages == null) return;
-
+    if (_selectedImages == null) {
+      setState(() {
+        _selectedImages = [XFile('assets/images/no_image_found.png')]; // Replace with your default image path
+        _loadImageBytes();
+      });
+    }
     _imageBytes.clear();
     for (var image in _selectedImages!) {
       try {

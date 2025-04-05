@@ -7,6 +7,7 @@ import 'package:shared_preferences/shared_preferences.dart';
 import 'package:universal_platform/universal_platform.dart';
 import '../models/item.dart';
 import '../config/api_config.dart';
+import 'package:flutter/services.dart' show rootBundle;
 
 class ItemService {
   final storage = const FlutterSecureStorage();
@@ -238,6 +239,23 @@ class ItemService {
               status: item.status,
             );
           }),
+        );
+      } else {
+        // Add default image when no images are selected
+        final ByteData defaultImageData = await rootBundle.load('assets/images/no_image_found.png');
+        final Uint8List defaultImageBytes = defaultImageData.buffer.asUint8List();
+        final String defaultBase64Image = base64Encode(defaultImageBytes);
+
+        item = item.copyWith(
+          images: [
+            ItemImage(
+              description: 'Default image for ${item.itemName}',
+              image: defaultBase64Image,
+              locationFound: item.locationFound,
+              dateTime: DateTime.now().toIso8601String(),
+              status: item.status,
+            )
+          ],
         );
       }
 

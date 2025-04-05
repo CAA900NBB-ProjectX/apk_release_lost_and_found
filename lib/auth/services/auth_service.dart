@@ -150,4 +150,19 @@ class AuthService {
       return null;
     }
   }
+
+  Future<int?> getCurrentUserName() async {
+    final token = await getToken();
+    if (token == null) return null;
+
+    try {
+      Map<String, dynamic> decodedToken = JwtDecoder.decode(token);
+      int userName = decodedToken['user']['username'];
+      print('User Name: $userName');
+
+      return userName;
+    } catch (e) {
+      return null;
+    }
+  }
 }

@@ -6,6 +6,7 @@ import '../auth/services/auth_service.dart';
 import 'dart:convert';
 import 'package:intl/intl.dart';
 import 'dart:typed_data';
+import 'notification_page.dart';
 import 'profile_page.dart'; // Import ProfilePage
 
 class HomeScreen extends StatefulWidget {
@@ -21,14 +22,22 @@ class _HomeScreenState extends State<HomeScreen> {
   List<Item> _allItems = [];
   List<Item> _foundItems = [];
   List<Item> _lostItems = [];
+  List<Item> _userItems = []; // New list for user's items
   bool _isLoading = true;
   String? _errorMessage;
   int _selectedIndex = 0;
+  final TextEditingController _searchController = TextEditingController();
 
   @override
   void initState() {
     super.initState();
     _loadItems();
+  }
+
+  @override
+  void dispose() {
+    _searchController.dispose();
+    super.dispose();
   }
 
   Future<void> _loadItems() async {
@@ -39,12 +48,17 @@ class _HomeScreenState extends State<HomeScreen> {
 
     try {
       final items = await _itemService.getAllItems();
+      // Get current user ID
+      final userId = await _authService.getCurrentUser();
+      final userName = userId?.username;
 
       if (mounted) {
         setState(() {
           _allItems = items!;
           _foundItems = items.where((item) => item.status == "FOUND").toList();
           _lostItems = items.where((item) => item.status == "LOST").toList();
+          // Filter items belonging to the current user
+          _userItems = items.where((item) => item.reportedBy == userName).toList();
           _isLoading = false;
         });
       }
@@ -66,14 +80,17 @@ class _HomeScreenState extends State<HomeScreen> {
   }
 
   void _onItemTapped(int index) {
-    if (index == 2) {
-      // Search functionality
-      _showSearchDialog();
+    // Handle search (now index 3)
+    if (index == 3) {
+      Navigator.push(
+        context,
+        MaterialPageRoute(builder: (context) => const NotificationsPage()),
+      );
       return;
     }
 
-    // Directly navigate to ProfilePage
-    if (index == 3) {
+    // Handle profile (now index 4)
+    if (index == 4) {
       Navigator.push(
         context,
         MaterialPageRoute(builder: (context) => ProfilePage()),
@@ -85,50 +102,6 @@ class _HomeScreenState extends State<HomeScreen> {
       _selectedIndex = index;
     });
   }
-
-  // void _showSearchDialog() {
-  //   final TextEditingController searchController = TextEditingController();
-  //
-  //   showDialog(
-  //     context: context,
-  //     builder: (context) => AlertDialog(
-  //       backgroundColor: Colors.grey[900],
-  //       title: const Text('Search Items', style: TextStyle(color: Colors.white)),
-  //       content: TextField(
-  //         controller: searchController,
-  //         style: const TextStyle(color: Colors.white),
-  //         decoration: InputDecoration(
-  //           hintText: 'Enter item name or description',
-  //           hintStyle: TextStyle(color: Colors.grey[400]),
-  //           filled: true,
-  //           fillColor: Colors.grey[800],
-  //           border: OutlineInputBorder(
-  //             borderRadius: BorderRadius.circular(8),
-  //             borderSide: BorderSide.none,
-  //           ),
-  //           prefixIcon: const Icon(Icons.search, color: Colors.green),
-  //         ),
-  //         onSubmitted: (value) {
-  //           _performSearch(value);
-  //           Navigator.pop(context);
-  //         },
-  //       ),
-  //       actions: [
-  //         TextButton(
-  //           child: const Text('Cancel', style: TextStyle(color: Colors.green)),
-  //           onPressed: () => Navigator.pop(context),
-  //         ),
-  //         TextButton(
-  //           child: const Text('Search', style: TextStyle(color: Colors.green)),
-  //           onPressed: () {
-  //             _performSearch(searchController.text);
-  //             Navigator.pop(context);
-  //           },
-  //         ),
-  //       ],
-  //     ),
-  //   );
-  // }
 
   void _showSearchDialog() {
     final TextEditingController searchController = TextEditingController();
@@ -173,61 +146,6 @@ class _HomeScreenState extends State<HomeScreen> {
       ),
     );
   }
-  // void _performSearch(String query) {
-  //   if (query.isEmpty) {
-  //     ScaffoldMessenger.of(context).showSnackBar(
-  //       const SnackBar(
-  //         content: Text('Please enter a search term'),
-  //         backgroundColor: Colors.amber,
-  //       ),
-  //     );
-  //     return;
-  //   }
-  //
-  //   final String searchTerm = query.toLowerCase();
-  //
-  //   // Create filtered lists based on the search query
-  //   final List<Item> filteredFoundItems = _allItems
-  //       .where((item) =>
-  //   item.status == "FOUND" && (_itemMatchesSearch(item, searchTerm)))
-  //       .toList();
-  //
-  //   final List<Item> filteredLostItems = _allItems
-  //       .where((item) =>
-  //   item.status == "LOST" && (_itemMatchesSearch(item, searchTerm)))
-  //       .toList();
-  //
-  //   // Show search results
-  //   if (filteredFoundItems.isEmpty && filteredLostItems.isEmpty) {
-  //     ScaffoldMessenger.of(context).showSnackBar(
-  //       SnackBar(
-  //         content: Text('No items match "$query"'),
-  //         backgroundColor: Colors.red,
-  //       ),
-  //     );
-  //     return;
-  //   }
-  //
-  //   // Navigate to search results screen
-  //   Navigator.push(
-  //     context,
-  //     MaterialPageRoute(
-  //       builder: (context) => SearchResultsScreen(
-  //         query: query,
-  //         foundItems: filteredFoundItems,
-  //         lostItems: filteredLostItems,
-  //       ),
-  //     ),
-  //   ).then((_) => _loadItems()); // Refresh items when returning
-  //
-  //   ScaffoldMessenger.of(context).showSnackBar(
-  //     SnackBar(
-  //       content:
-  //       Text('Found ${filteredFoundItems.length + filteredLostItems.length} matching items'),
-  //       backgroundColor: Colors.green,
-  //     ),
-  //   );
-  // }
 
   void _performSearch(String query) {
     if (query.isEmpty) {
@@ -295,7 +213,6 @@ class _HomeScreenState extends State<HomeScreen> {
         item.getCategoryName().toLowerCase().contains(searchTerm);
   }
 
-
   Widget _getBody() {
     if (_isLoading) {
       return const Center(child: CircularProgressIndicator(color: Colors.green));
@@ -310,6 +227,8 @@ class _HomeScreenState extends State<HomeScreen> {
         return _buildItemGrid(_foundItems);
       case 1:
         return _buildItemGrid(_lostItems);
+      case 2:
+        return _buildItemGrid(_userItems); // My Items case
       default:
         return _buildItemGrid(_foundItems);
     }
@@ -319,12 +238,69 @@ class _HomeScreenState extends State<HomeScreen> {
   Widget build(BuildContext context) {
     return Scaffold(
       backgroundColor: Colors.black,
+      // appBar: AppBar(
+      //   backgroundColor: Colors.black,
+      //   title: TextField(
+      //     controller: _searchController,
+      //     style: const TextStyle(color: Colors.white),
+      //     decoration: InputDecoration(
+      //       hintText: 'Search items...',
+      //       hintStyle: TextStyle(color: Colors.grey[400]),
+      //       filled: true,
+      //       fillColor: Colors.grey[800],
+      //       border: OutlineInputBorder(
+      //         borderRadius: BorderRadius.circular(12),
+      //         borderSide: BorderSide.none,
+      //       ),
+      //       prefixIcon: const Icon(Icons.search, color: Colors.green),
+      //       contentPadding: const EdgeInsets.symmetric(vertical: 0),
+      //     ),
+      //     onSubmitted: (value) {
+      //       _performSearch(value);
+      //     },
+      //   ),
+      //   actions: [
+      //     IconButton(
+      //       icon: const Icon(Icons.logout, color: Colors.white),
+      //       onPressed: _logout,
+      //     ),
+      //   ],
+      // ),
+      // Modify your TextField in the AppBar section of the build method
+// Find this section in your code:
+
       appBar: AppBar(
         backgroundColor: Colors.black,
-        title: const Text('Found It!', style: TextStyle(color: Colors.white)),
+        title: TextField(
+          controller: _searchController,
+          style: const TextStyle(color: Colors.white),
+          decoration: InputDecoration(
+            hintText: 'Search items...',
+            hintStyle: TextStyle(color: Colors.grey[400]),
+            filled: true,
+            fillColor: Colors.grey[800],
+            border: OutlineInputBorder(
+              borderRadius: BorderRadius.circular(12),
+              borderSide: BorderSide.none,
+            ),
+            // prefixIcon: const Icon(Icons.search, color: Colors.green),
+            contentPadding: const EdgeInsets.fromLTRB(16, 0, 0, 0),
+            // contentPadding: const EdgeInsets.symmetric(vertical: 0),
+            // Add a suffix icon that acts as a search button
+            suffixIcon: IconButton(
+              icon: const Icon(Icons.search, color: Colors.green),
+              onPressed: () {
+                _performSearch(_searchController.text);
+              },
+            ),
+          ),
+          onSubmitted: (value) {
+            _performSearch(value);
+          },
+        ),
         actions: [
           IconButton(
-            icon: const Icon(Icons.logout, color: Colors.white),
+            icon: const Icon(Icons.logout, color: Colors.green),
             onPressed: _logout,
           ),
         ],
@@ -339,7 +315,7 @@ class _HomeScreenState extends State<HomeScreen> {
         selectedItemColor: Colors.green,
         unselectedItemColor: Colors.grey,
         currentIndex:
-        _selectedIndex > 1 ? _selectedIndex - 2 : _selectedIndex, // Adjust for additional items
+        _selectedIndex > 2 ? _selectedIndex - 3 : _selectedIndex, // Adjust for additional items
         type: BottomNavigationBarType.fixed, // Important for 4+ items
         onTap: _onItemTapped,
         items: const [
@@ -349,14 +325,19 @@ class _HomeScreenState extends State<HomeScreen> {
             label: 'Found Items',
           ),
           BottomNavigationBarItem(
-            icon: Icon(Icons.search_outlined),
-            activeIcon: Icon(Icons.search),
+            icon: Icon(Icons.assignment_late_outlined),
+            activeIcon: Icon(Icons.assignment_late),
             label: 'Lost Items',
           ),
           BottomNavigationBarItem(
-            icon: Icon(Icons.manage_search),
-            activeIcon: Icon(Icons.manage_search),
-            label: 'Search',
+            icon: Icon(Icons.inventory_2_outlined),
+            activeIcon: Icon(Icons.inventory_2),
+            label: 'My Items',
+          ),
+          BottomNavigationBarItem(
+            icon: Icon(Icons.notifications_outlined),
+            activeIcon: Icon(Icons.notifications),
+            label: 'Notifications',
           ),
           BottomNavigationBarItem(
             icon: Icon(Icons.person_outline),
@@ -412,13 +393,19 @@ class _HomeScreenState extends State<HomeScreen> {
       child: Card(
         elevation: 4,
         color: Colors.grey[900],
-        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+        shape: RoundedRectangleBorder(
+          borderRadius: BorderRadius.circular(12),
+          side: BorderSide(
+            color: _getCategoryColor(item.categoryId), // Use category color for border
+            width: 2.0,
+          ),
+        ),
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
             // Image or placeholder - Fixed height to prevent overflow
             Container(
-              height: 120, // Fixed height for image section
+              height: 150, // Fixed height for image section
               decoration: BoxDecoration(
                 color: _getCategoryColor(item.categoryId),
                 borderRadius: const BorderRadius.only(
@@ -534,4 +521,3 @@ class _HomeScreenState extends State<HomeScreen> {
     }
   }
 }
-
